@@ -204,7 +204,7 @@ class KernelPanel(ModulePanel):
     def __init__(self, ws: Workspace) -> None:
         super().__init__(ws)
         f = self.form
-        f.add_combo("kernel", "Kernel", list(KERNELS), "Kernel class")
+        f.add_combo("kernel", "Kernel", list(KERNELS), "Kernel class", current="Gaussian2DKernel")
         f.add_text("params", "Parameters", KERNELS["Gaussian2DKernel"][2],
                    "key=value list; Model kernels: a model expression, e.g. models.Gaussian1D(1,0,2)")
         f.add_int("x_size", "x_size", 0, 0, 10001, "odd size in x; 0 = automatic (8 sigma)")

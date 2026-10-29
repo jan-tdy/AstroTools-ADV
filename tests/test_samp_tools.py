@@ -176,3 +176,20 @@ def test_panel_end_to_end(qtbot, ws, lockfile, monkeypatch):
     panel.session.close()
     assert not panel.session.hub_running
     assert wait_for(lambda: not _samp_threads()), _samp_threads()
+
+
+def test_image_message_prefers_explicit_url_over_workspace_object(qtbot, ws, tmp_path):
+    """The workspace combo always has a current item, so it must not shadow the path field."""
+    ws.put("a_table", Table({"x": [1.0]}))          # not an image: would raise if it were used
+    panel = st.SampPanel(ws)
+    qtbot.addWidget(panel)
+    img = tmp_path / "m.fits"
+    fits.PrimaryHDU([[1, 2], [3, 4]]).writeto(img)
+    panel.form.set_value("mtype", "image.load.fits")
+    panel.form.set_value("url", str(img))
+    mtype, params = panel.build_message()
+    assert mtype == "image.load.fits" and params == {"url": img.resolve().as_uri()}
+    panel.form.set_value("url", "")
+    with pytest.raises(ParseError):                 # falls back to the (non-image) workspace object
+        panel.build_message()
+    panel.session.close()

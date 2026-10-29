@@ -320,8 +320,8 @@ class SampPanel(ModulePanel):
         f.add_combo("mtype", "Message", MESSAGE_TYPES)
         self.object_combo = WorkspaceCombo(ws)
         f.add_widget("object", "Workspace object", self.object_combo)
-        f.add_text("url", "File / URL", "", "Image file path or URL for image.load.fits "
-                   "(used when no workspace object is chosen).")
+        f.add_text("url", "File / URL", "", "Image file path or URL for image.load.fits. "
+                   "When filled in, it is sent instead of the workspace object.")
         f.add_text("coord", "Coordinate", "10.68 41.27", "For coord.pointAt.sky, e.g. '10.68 41.27' "
                    "or '00h42m44s +41d16m09s'.")
         f.add_text("custom", "Custom type", "", "Message type when Message = custom.")
@@ -439,13 +439,13 @@ class SampPanel(ModulePanel):
                 raise ParseError("Select a table in 'Workspace object'.")
             return kind, self.session.table_message(table, self.object_combo.currentText())
         if kind == "image.load.fits":
-            if self.object_combo.currentText():
-                return kind, self.session.image_message(self.object_combo.selected(),
-                                                        self.object_combo.currentText())
-            if not v["url"]:
-                raise ParseError("Choose a workspace image or enter a file path / URL.")
-            url = v["url"] if "://" in v["url"] else Path(v["url"]).resolve().as_uri()
-            return kind, {"url": url}
+            if v["url"]:  # an explicit path/URL wins; the workspace combo is never empty-valued
+                url = v["url"] if "://" in v["url"] else Path(v["url"]).resolve().as_uri()
+                return kind, {"url": url}
+            if not self.object_combo.currentText():
+                raise ParseError("Enter a file path / URL or choose a workspace image.")
+            return kind, self.session.image_message(self.object_combo.selected(),
+                                                    self.object_combo.currentText())
         if kind == "coord.pointAt.sky":
             c = parse_skycoord(v["coord"]).icrs
             return kind, {"ra": repr(float(c.ra.deg)), "dec": repr(float(c.dec.deg))}
