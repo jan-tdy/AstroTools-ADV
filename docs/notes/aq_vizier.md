@@ -11,7 +11,7 @@ Queries [VizieR](https://vizier.cds.unistra.fr/), the CDS library of published a
 | Query constraints | **Constraints** `*`; optionally **Catalogs**, **Columns**, **Max rows** | Rows satisfying the constraints, with no position search |
 | Find catalogs | **Keywords** `*`, **Max catalogs** | A table of catalog ids and descriptions |
 | Download catalog | **Catalog id** `*`, **Max rows** | The tables of that catalog |
-| Catalog metadata | **Catalog id** `*` | Column descriptions of that catalog |
+| Catalog metadata | **Catalog id** `*` | A table of metadata for that catalog |
 
 1. Choose the query mode.
 2. To search a particular catalog, type its id in **Catalogs** (`I/239/hip_main`, one per line or comma separated). Leave it empty to search every catalog that has rows there. If you do not know the id, run **Find catalogs** first with keywords such as `hipparcos`.
@@ -25,7 +25,7 @@ Queries [VizieR](https://vizier.cds.unistra.fr/), the CDS library of published a
 
 VizieR returns one table per catalog table that matched. The **Result table** drop-down lists them by catalog id; choose the one to display, store or save. The **Info** tab lists the row and column counts of each.
 
-**Find catalogs** returns two columns, the catalog `name` and its `description`. **Catalog metadata** returns the column descriptions of the catalog.
+**Find catalogs** returns two columns, the catalog `name` and its `description`. **Catalog metadata** returns a table of metadata for the catalog.
 
 ## Tips and limits
 
