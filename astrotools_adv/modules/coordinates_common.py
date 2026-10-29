@@ -280,9 +280,11 @@ class FrameInput(QGroupBox):
     """Frame selector with the attribute fields relevant to the chosen frame."""
 
     def __init__(self, ws: Workspace, title: str = "Frame", default: str = "ICRS",
-                 frames: Optional[Sequence[str]] = None, parent: Optional[QWidget] = None) -> None:
+                 frames: Optional[Sequence[str]] = None, always_obstime: bool = False,
+                 parent: Optional[QWidget] = None) -> None:
         super().__init__(title, parent)
         self.ws = ws
+        self.always_obstime = always_obstime  # show Obstime for every frame (epoch of PMs)
         self.frame = QComboBox()
         self.frame.addItems(list(frames) if frames else FRAME_NAMES)
         self.frame.setCurrentText(default)
@@ -351,7 +353,8 @@ class FrameInput(QGroupBox):
         name = self.name()
         attrs = frame_attribute_names(name)
         show = {
-            "equinox": "equinox" in attrs, "obstime": "obstime" in attrs,
+            "equinox": "equinox" in attrs,
+            "obstime": "obstime" in attrs or self.always_obstime,
             "location": name in TOPOCENTRIC, "refraction": "pressure" in attrs,
             "galcen": name == "Galactocentric", "origin": name == SKYOFFSET,
         }
@@ -470,7 +473,8 @@ class CoordInput(QGroupBox):
 
     def __init__(self, ws: Workspace, title: str = "Coordinates", default_text: str = "",
                  default_source: str = TEXT, motion: bool = True,
-                 frames: Optional[Sequence[str]] = None, parent: Optional[QWidget] = None) -> None:
+                 frames: Optional[Sequence[str]] = None, epoch: bool = False,
+                 parent: Optional[QWidget] = None) -> None:
         super().__init__(title, parent)
         self.ws = ws
         self.source = QComboBox()
@@ -502,7 +506,7 @@ class CoordInput(QGroupBox):
                      (self.pm_lat, "Proper motion in lat (default mas/yr)."),
                      (self.rv, "Radial velocity (default km/s); needs a distance.")):
             w.setToolTip(t)
-        self.frame = FrameInput(ws, "Coordinate frame", frames=frames)
+        self.frame = FrameInput(ws, "Coordinate frame", frames=frames, always_obstime=epoch)
         self._form = QFormLayout()
         self._rows: Dict[str, List[QWidget]] = {}
         self._form.addRow("Source", self.source)

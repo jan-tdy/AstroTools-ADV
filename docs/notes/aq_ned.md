@@ -14,7 +14,7 @@ Queries the [NASA/IPAC Extragalactic Database (NED)](https://ned.ipac.caltech.ed
 
 1. Choose the query mode and fill in its fields.
 2. For **Object data table**, choose the table: `photometry`, `positions`, `diameters`, `redshifts`, `references` or `object_notes`.
-3. For **Objects of a reference**, enter NED's 19-digit reference code (it is the bibcode written in NED's own form; the object's NED page shows it).
+3. For **Objects of a reference**, enter the 19-character reference code, which has the form of a bibcode (for example `1997A&A...323...31K`).
 4. Press **Run query**.
 
 ## Reading the results

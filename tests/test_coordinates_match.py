@@ -193,3 +193,15 @@ def test_concatenate_mixed_frames(qtbot, ws):
     assert len(out) == 2 and out.frame.name == "galactic"  # frame of the first (sorted) item
     assert out[0].l.deg == pytest.approx(120.0)
     assert out[1].icrs.ra.deg == pytest.approx(10.0)
+
+
+def test_space_motion_epoch_field_is_visible_for_icrs(qtbot, ws):
+    p = make(qtbot, ws, cm.SpaceMotionPanel)
+    p.show()
+    assert not p.inp.frame.obstime.isHidden()
+    p.inp.frame.obstime.setText("J2016.0")
+    p.form.set_value("new_obstime", "J2026.0")
+    p.apply()
+    assert abs(p.result.obstime.jyear - 2026.0) < 1e-6
+    shift = p.result.separation(p.inp.get())
+    assert shift.arcsec == pytest.approx(10 * 10328.12 / 1000, rel=0.02)

@@ -24,5 +24,5 @@ One row per epoch. **Ephemerides** gives columns such as the target name, epoch,
 
 - Time scales are decided by Horizons: ephemeris epochs are UTC, element and vector epochs are TDB. Compare with another tool only after allowing for that.
 - The default range is `2026-01-01` to `2026-01-10` in steps of `1d`. A fine step over a long range returns a very large table; Horizons refuses requests above its own limits and the message is shown in the **Info** tab.
-- A target name that matches several bodies makes Horizons return a list of matches instead of data; set **Target type** or use the numeric id.
+- A target name that matches several bodies produces the error `Ambiguous target name; provide unique id:` followed by the matches. Copy one of the ids into **Target**, or set **Target type**.
 - **Location** with an unknown observatory code produces an error from Horizons. The codes are listed on the Minor Planet Center's site; the [Minor Planet Center](aq_mpc.md) page has an **Observatory codes** query for them.

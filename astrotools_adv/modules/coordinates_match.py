@@ -163,7 +163,7 @@ class SpaceMotionPanel(ModulePanel):
     def __init__(self, ws: Workspace) -> None:
         super().__init__(ws)
         self.inp = CoordInput(ws, "Coordinates with proper motion",
-                              default_text="269.45 4.69")
+                              default_text="269.45 4.69", epoch=True)
         self.controls_layout.insertWidget(0, self.inp)
         self.inp.distance.setText("1.83 pc")
         self.inp.pm_lon.setText("-798.58")
