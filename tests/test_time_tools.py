@@ -329,3 +329,12 @@ def test_tai_minus_utc_across_history():
     for date, expected in [("1972-01-01", 10.0), ("1999-01-01", 32.0), ("2017-01-01", 37.0),
                            ("2024-01-01", 37.0)]:
         assert m.tai_minus_utc(Time(date, scale="utc")) == pytest.approx(expected, abs=1e-6)
+
+
+def test_tai_minus_utc_on_a_leap_second_day():
+    """The day ending in a leap second must not show a fractional offset (was 36.999977)."""
+    for date in ("2016-12-31 00:00:00", "2016-12-31 12:00:00", "2016-12-31 23:59:59"):
+        assert m.tai_minus_utc(Time(date, scale="utc")) == pytest.approx(36.0, abs=1e-9)
+    assert m.tai_minus_utc(Time("2017-01-01", scale="utc")) == pytest.approx(37.0, abs=1e-9)
+    arr = m.tai_minus_utc(Time(["2016-12-31 23:59:59", "2017-01-01"], scale="utc"))
+    assert list(arr) == [36.0, 37.0]

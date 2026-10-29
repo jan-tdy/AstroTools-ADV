@@ -193,3 +193,18 @@ def test_image_message_prefers_explicit_url_over_workspace_object(qtbot, ws, tmp
     with pytest.raises(ParseError):                 # falls back to the (non-image) workspace object
         panel.build_message()
     panel.session.close()
+
+
+def test_session_close_after_panel_destroyed_does_not_raise(qtbot, ws, lockfile):
+    """At interpreter exit the session may be closed after the panel's C++ object is gone."""
+    from PyQt5 import sip
+
+    panel = st.SampPanel(ws)
+    try:
+        panel.session.start_hub(lockfile)
+    except Exception as exc:  # noqa: BLE001
+        pytest.skip(f"sandbox does not allow a local SAMP hub: {exc}")
+    session = panel.session
+    sip.delete(panel)
+    session.close()                 # used to raise AttributeError from on_log -> abort
+    assert not session.hub_running

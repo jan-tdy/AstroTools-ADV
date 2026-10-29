@@ -321,9 +321,16 @@ def leap_seconds_table() -> Tuple[Table, str]:
 
 
 def tai_minus_utc(t: Time) -> np.ndarray:
-    """TAI-UTC in seconds for UTC times."""
-    tai, utc = t.tai, t.utc
-    return ((tai.jd1 - utc.jd1) + (tai.jd2 - utc.jd2)) * 86400.0
+    """TAI-UTC in seconds for UTC times.
+
+    Uses ``erfa.dat`` on the calendar date: subtracting the JD pairs of ``t.tai`` and
+    ``t.utc`` is wrong on a day that ends with a leap second, because astropy's UTC
+    two-part JD stretches that day to 86401 seconds.
+    """
+    ymdhms = np.atleast_1d(t.utc.ymdhms)
+    fraction = (ymdhms["hour"] * 3600.0 + ymdhms["minute"] * 60.0 + ymdhms["second"]) / 86400.0
+    dat = np.asarray(erfa.dat(ymdhms["year"], ymdhms["month"], ymdhms["day"], fraction))
+    return dat.reshape(t.shape)
 
 
 def earth_orientation(date_text: str) -> str:

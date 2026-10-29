@@ -304,7 +304,7 @@ class SampPanel(ModulePanel):
 
     def __init__(self, ws: Workspace) -> None:
         super().__init__(ws)
-        self.session = SampSession(on_message=self._emit_message, on_log=self.log_line.emit)
+        self.session = SampSession(on_message=self._emit_message, on_log=self._session_log)
         self.message_received.connect(self._on_message)
         self.log_line.connect(self._on_log)
 
@@ -358,9 +358,18 @@ class SampPanel(ModulePanel):
             f"Hub: {'running' if self.session.hub_running else 'stopped'}  |  "
             f"Client: {'connected' if self.session.connected else 'disconnected'}")
 
+    def _session_log(self, text: str) -> None:
+        try:
+            self.log_line.emit(text)
+        except (RuntimeError, AttributeError):
+            pass  # panel already destroyed (interpreter shutdown): nothing left to show
+
     def _emit_message(self, mtype: str, params: Dict[str, Any], sender: str,
                       msg_id: Optional[str]) -> None:
-        self.message_received.emit(mtype, params, sender, msg_id)  # SAMP thread -> GUI
+        try:
+            self.message_received.emit(mtype, params, sender, msg_id)  # SAMP thread -> GUI
+        except (RuntimeError, AttributeError):
+            pass
 
     def _on_log(self, text: str) -> None:
         self.log.append_text(text)

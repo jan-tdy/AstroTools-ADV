@@ -253,9 +253,10 @@ def test_compare_clone_default(qtbot, ws):
         panel.form.set_value("changes", bad)
         with pytest.raises(ParseError):
             panel.clone()
-    panel.form.set_value("changes", "Om0=-3")
-    with pytest.raises(ParseError):
-        panel.clone()
+    for bad in ("Om0=-3", "H0=-5", "H0=0"):
+        panel.form.set_value("changes", bad)
+        with pytest.raises(ParseError):
+            panel.clone()
     panel.selector.model.setCurrentText("WMAP9")
     panel.set_default()
     assert cosmology.default_cosmology.get().name == "WMAP9"

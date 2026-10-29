@@ -179,6 +179,8 @@ def main() -> None:
     from capture import capture
 
     app = QApplication.instance() or QApplication(sys.argv[:1])  # noqa: F841 - must stay alive
+    from astrotools_adv.core import tasks
+    tasks.set_synchronous(True)  # no worker threads racing with widget teardown
     specs, failures = registry.discover()
     if failures:
         raise SystemExit(f"modules failed to load: {failures}")

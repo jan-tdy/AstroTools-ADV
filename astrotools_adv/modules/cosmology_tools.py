@@ -692,6 +692,12 @@ class CompareIOPanel(_CosmoPanel):
             new = a.clone(**kw)
         except (ValueError, TypeError, u.UnitsError) as exc:
             raise ParseError(f"Invalid change: {exc}") from None
+        if not new.H0.value > 0:
+            raise ParseError("H0 must be positive.")
+        for key in ("Om0", "Tcmb0", "Neff"):
+            value = getattr(new, key)
+            if not np.all(np.asarray(getattr(value, "value", value)) >= 0):
+                raise ParseError(f"{key} must be >= 0.")
         name = self.form.value("cname")
         if not name:
             raise ParseError("Enter a 'Store as' name.")

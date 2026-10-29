@@ -30,6 +30,7 @@ def capture(img_dir: Path, json_path: Path, shots: bool = True) -> list:
     img_dir.mkdir(parents=True, exist_ok=True)
     json_path.parent.mkdir(parents=True, exist_ok=True)
     for spec in specs:
+        print(f"  {spec.key}", flush=True)
         infos.append(introspect.inspect_tool(spec, ws))
         if shots:
             widget = spec.factory(ws)
@@ -39,6 +40,7 @@ def capture(img_dir: Path, json_path: Path, shots: bool = True) -> list:
             widget.grab().save(str(img_dir / f"{spec.key}.png"))
             widget.close()
             widget.deleteLater()
+            app.processEvents()
     json_path.write_text(
         json.dumps([dataclasses.asdict(i) for i in infos], indent=1), encoding="utf-8")
     return infos
