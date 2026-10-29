@@ -512,14 +512,12 @@ class CoordInput(QGroupBox):
             self._rows.setdefault(key, []).append(widget)
 
         row("text", "Lines", self.text)
-        row("text", "Lon unit", self.lon_unit)
-        row("text", "Lat unit", self.lat_unit)
         row("sc", "SkyCoord", self.sc_combo)
         row("table", "Table", self.tbl_combo)
         for k, label in (("lon", "Lon / RA column"), ("lat", "Lat / Dec column")):
             row("table", label, self.cols[k])
-        row("tabletext", "Lon unit", self.lon_unit)
-        row("tabletext", "Lat unit", self.lat_unit)
+        row("units", "Lon unit", self.lon_unit)
+        row("units", "Lat unit", self.lat_unit)
         if motion:
             for k, label in (("distance", "Distance column"), ("pm_lon", "PM lon column"),
                              ("pm_lat", "PM lat column"), ("rv", "RV column")):
@@ -542,14 +540,11 @@ class CoordInput(QGroupBox):
     # ---- UI state --------------------------------------------------------- #
     def _update_rows(self) -> None:
         src = self.source.currentText()
-        visible = {"text": src == TEXT, "sc": src == WS_SKYCOORD, "table": src == WS_TABLE}
-        seen: Dict[QWidget, bool] = {}
+        visible = {"text": src == TEXT, "sc": src == WS_SKYCOORD, "table": src == WS_TABLE,
+                   "units": src != WS_SKYCOORD}
         for key, widgets in self._rows.items():
             for w in widgets:
-                flag = visible.get(key, False) or (key == "tabletext" and src != WS_SKYCOORD)
-                seen[w] = seen.get(w, False) or flag
-        for w, flag in seen.items():
-            set_row_visible(self._form, w, flag)
+                set_row_visible(self._form, w, visible[key])
         self.frame.setVisible(src != WS_SKYCOORD)
 
     def refresh(self) -> None:
