@@ -739,7 +739,8 @@ class UtilsPanel(QWidget):
 
         p = self._page("JSON encoder", "Encode", tool_json)
         p.form.add_text("expr", "Expression", "{'d': 3 * u.m, 'a': np.arange(3)}",
-                        "Quantities, arrays, times ... via JsonCustomEncoder.")
+                        "Quantities, units, arrays, sets, bytes and complex numbers via JsonCustomEncoder "
+                        "(Time and SkyCoord objects are not supported).")
 
     def _page(self, title: str, button: str, func: Callable[[Dict[str, Any]], str]) -> ToolPage:
         page = ToolPage(button, func)

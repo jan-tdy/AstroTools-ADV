@@ -428,7 +428,7 @@ class WcsBuilderPanel(ModulePanel):
                     current="TAN")
         f.add_combo("frame", "Frame", list(FRAMES))
         f.add_text("fname", "Frame name", "galactic",
-                   "'celestial frame' source: any astropy frame name (icrs, fk5, fk4, galactic...)")
+                   "'celestial frame' source: icrs, fk5, fk4, fk4noeterms, galactic or itrs")
         f.add_text("crval", "CRVAL (lon lat)", "150.0 2.0", "reference sky position; angles allowed")
         f.add_text("crpix", "CRPIX (x y)", "50.5 50.5", "FITS 1-based reference pixel")
         f.add_float("scale", "Pixel scale (arcsec)", 1.0, 1e-9, 1e9, 6)
