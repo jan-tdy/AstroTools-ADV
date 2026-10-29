@@ -142,6 +142,15 @@ class MainWindow(QMainWindow):
 MIN_ASTROPY = (6, 0)
 
 
+def _excepthook(exc_type, exc, tb) -> None:
+    """Show unexpected errors instead of letting PyQt5 abort the process."""
+    import traceback
+
+    log.error("unhandled exception", exc_info=(exc_type, exc, tb))
+    if QApplication.instance() is not None and exc is not None:
+        error_box(QApplication.activeWindow(), exc, "".join(traceback.format_exception(exc_type, exc, tb)))
+
+
 def environment_warnings() -> List[Tuple[str, str]]:
     """Non-fatal problems with the installed dependencies."""
     import astropy
@@ -161,6 +170,7 @@ def environment_warnings() -> List[Tuple[str, str]]:
 def main(argv: Optional[List[str]] = None) -> int:
     logging.basicConfig(level=logging.WARNING)
     app = QApplication(list(argv if argv is not None else sys.argv))
+    sys.excepthook = _excepthook  # PyQt5 aborts the process on uncaught slot errors
     app.setApplicationName(APP_NAME)
     specs, failures = registry.discover()
     win = MainWindow(specs, failures + environment_warnings())

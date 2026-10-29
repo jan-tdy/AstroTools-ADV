@@ -187,3 +187,20 @@ def test_parse_quantity_composite_units():
     assert p.parse_quantity("2*u.pc") == 2 * u.pc
     with pytest.raises(p.ParseError):
         p.parse_quantity("3 notaunit")
+
+
+def test_safe_eval_bitwise_masks():
+    x = np.array([1, 3, 5])
+    assert list(p.safe_eval("(x > 1) & (x < 5)", {"x": x})) == [False, True, False]
+    assert list(p.safe_eval("~(x > 2)", {"x": x})) == [True, False, False]
+
+
+def test_button_exceptions_are_reported(qtbot, ws, monkeypatch):
+    shown = []
+    monkeypatch.setattr("astrotools_adv.core.widgets.error_box",
+                        lambda parent, exc, detail="": shown.append(exc))
+    panel = ModulePanel(ws)
+    qtbot.addWidget(panel)
+    btn = panel.add_button("boom", lambda: 1 / 0)
+    btn.click()
+    assert isinstance(shown[0], ZeroDivisionError)

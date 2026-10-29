@@ -385,7 +385,7 @@ class ModulePanel(QWidget):
     def add_button(self, text: str, slot: Callable[[], None], tip: str = "") -> QPushButton:
         btn = QPushButton(text)
         btn.setToolTip(tip)
-        btn.clicked.connect(lambda _checked=False: slot())
+        btn.clicked.connect(lambda _checked=False: self.guard(slot))
         self.buttons_layout.addWidget(btn)
         return btn
 

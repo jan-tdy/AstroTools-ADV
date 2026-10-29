@@ -295,8 +295,8 @@ def velocity_corrections(location: EarthLocation, targets: SkyCoord, times: Time
                                                                  location=location).to_value(u.km / u.s)
         out["rv_corr_helio_kms"] = tg.radial_velocity_correction("heliocentric", obstime=tm,
                                                                   location=location).to_value(u.km / u.s)
-        ltt_b = tg.light_travel_time(tm, "barycentric", location=location)
-        ltt_h = tg.light_travel_time(tm, "heliocentric", location=location)
+        ltt_b = tm.light_travel_time(tg, "barycentric", location=location)
+        ltt_h = tm.light_travel_time(tg, "heliocentric", location=location)
         out["ltt_bary_s"] = ltt_b.to_value(u.s)
         out["ltt_helio_s"] = ltt_h.to_value(u.s)
         out["bjd_tdb"] = (tm.tdb + ltt_b).jd

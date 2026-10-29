@@ -28,8 +28,9 @@ _BIN_OPS = {
     ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
     ast.Div: operator.truediv, ast.FloorDiv: operator.floordiv,
     ast.Mod: operator.mod, ast.Pow: operator.pow, ast.MatMult: operator.matmul,
+    ast.BitAnd: operator.and_, ast.BitOr: operator.or_, ast.BitXor: operator.xor,
 }
-_UNARY_OPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}
+_UNARY_OPS = {ast.UAdd: operator.pos, ast.USub: operator.neg, ast.Invert: operator.invert}
 _MAX_POW = 10_000
 _MAX_NODES = 2_000
 _ALLOWED_MODULE_ROOTS = ("numpy", "astropy")
