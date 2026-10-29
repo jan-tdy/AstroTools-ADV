@@ -753,12 +753,22 @@ class FoldBinPanel(SeriesPanel):
         kw: Dict[str, Any] = {"aggregate_func": self.AGG[v["agg"]]}
         if v["bin_start"]:
             kw["time_bin_start"] = parse_time(v["bin_start"], name="bin start")
+        n_bins = int(v["n_bins"])
+        size = parse_quantity(v["bin_size"], u.day, "bin size")
         if v["bin_end"]:
-            kw["time_bin_end"] = parse_time(v["bin_end"], name="bin end")
-        if int(v["n_bins"]) > 0:
-            kw["n_bins"] = int(v["n_bins"])
-        if "time_bin_end" not in kw:
-            kw["time_bin_size"] = parse_quantity(v["bin_size"], u.day, "bin size")
+            end = parse_time(v["bin_end"], name="bin end")
+            span = (end - kw.get("time_bin_start", ts.time.min())).to(u.day)
+            if span.value <= 0:
+                raise ParseError("Bin end must be later than the bin start.")
+            if n_bins > 0:
+                size = span / n_bins
+            elif size.value > 0:
+                n_bins = int(np.ceil((span / size).decompose().value))
+        if not size.value > 0:
+            raise ParseError("Bin size must be positive.")
+        kw["time_bin_size"] = size
+        if n_bins > 0:
+            kw["n_bins"] = n_bins
         if not v["bin_out"]:
             raise ParseError("Enter a binned name.")
         if not isinstance(ts, TimeSeries):

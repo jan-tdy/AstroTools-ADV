@@ -1,6 +1,6 @@
 ## What it does
 
-Searches the [Mikulski Archive for Space Telescopes (MAST)](https://mast.stsci.edu/) for observations (HST, JWST, TESS, Kepler and others) and for MAST-hosted catalogs. The page runs metadata queries only: it lists observations and the data products belonging to them, but does not download files, and it does not log in, so proprietary data cannot be listed. Results come from the remote service; see [the category overview](index.md) for the shared layout and error messages.
+Searches the [Mikulski Archive for Space Telescopes (MAST)](https://mast.stsci.edu/) for observations (HST, JWST, TESS, Kepler and others) and for MAST-hosted catalogs. The page runs metadata queries only: it lists observations and the data products belonging to them, but does not download files, and it does not log in, so files that need a MAST account stay out of reach. Results come from the remote service; see [the category overview](index.md) for the shared layout and error messages.
 
 ## How to use
 
@@ -22,7 +22,7 @@ Searches the [Mikulski Archive for Space Telescopes (MAST)](https://mast.stsci.e
 
 ## Reading the results
 
-Observation tables have one row per observation with columns such as collection, target name, instrument, filters, exposure time, position and an `obsid`. The `obsid` column is what the **data products** query needs. A product table has one row per file with its name, type, size and `dataURI`. Catalog queries return the columns of the chosen catalog. **Info** shows the counts.
+Observation tables have one row per observation with columns such as collection, target name, instrument, filters, exposure time, position and an `obsid`. The `obsid` column is what the **data products** query needs. A product table has one row per file with its file name, description, size and a `dataURI`. Catalog queries return the columns of the chosen catalog. **Info** shows the counts.
 
 ## Tips and limits
 

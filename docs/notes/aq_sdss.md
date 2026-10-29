@@ -18,7 +18,7 @@ Searches the [Sloan Digital Sky Survey](https://www.sdss.org/) catalogs by posit
 
 ## Reading the results
 
-The **Table** tab lists the SDSS objects with their IDs, positions and magnitudes (the default photometric columns for region and cross-identification queries). With **Spectroscopic only** the table describes the spectra. **Info** shows the row and column counts. If nothing is found astroquery may return no table at all, and the **Info** tab then reports the empty result.
+The **Table** tab lists the SDSS objects with their IDs, positions and magnitudes (the default photometric columns for region and cross-identification queries). With **Spectroscopic only** the rows are the objects that have a spectrum. **Info** shows the row and column counts. If nothing is found astroquery may return no table at all, and the **Info** tab then reports the empty result.
 
 ## Tips and limits
 
