@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# generated documentation (rebuilt by tools/build_reference.py)
+/site/
+/docs/reference/
+/docs/assets/tools/
+/docs/assets/guides/
+/docs/guides/SUMMARY.md
+/tools/_build/

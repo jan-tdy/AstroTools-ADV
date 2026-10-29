@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=AstroTools-ADV
+Comment=PyQt5 GUI for astropy and astroquery
+Exec=python3 __INSTALL_DIR__/astrotools.py
+Path=__INSTALL_DIR__
+Icon=__INSTALL_DIR__/assets/astrotools-adv.svg
+Categories=Science;Astronomy;Education;
+Terminal=false

@@ -1,0 +1,15 @@
+* [Home](index.md)
+* [Getting started](getting-started.md)
+* Concepts
+    * [The interface](concepts/interface.md)
+    * [Entering values](concepts/entering-values.md)
+    * [The workspace](concepts/workspace.md)
+    * [Background work and offline use](concepts/background-work.md)
+* [Guides](guides/)
+* [Tool reference](reference/)
+* Project
+    * [Architecture](project/architecture.md)
+    * [Adding a tool](project/writing-a-tool.md)
+    * [Testing](project/testing.md)
+    * [Building the documentation](project/building-the-docs.md)
+    * [Licensing](project/licensing.md)

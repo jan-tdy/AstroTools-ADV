@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "publisher": "jan-tdy",
+  "repo": "AstroTools-ADV",
+  "homepage": "https://github.com/jan-tdy/AstroTools-ADV",
+  "apps": [
+    {
+      "id": "astrotools-adv",
+      "name": "AstroTools-ADV",
+      "tagline": "A PyQt5 GUI for the whole astropy and astroquery ecosystem",
+      "description": "Desktop front-end for astropy: units, constants, time, coordinates, tables, FITS and other I/O, WCS, NDData, convolution, visualization, modeling, statistics, time series, cosmology, SAMP, utilities and astroquery services, plus an API explorer that reaches every public astropy callable. Objects can be passed between tools through a shared workspace.",
+      "category": "Astronomy",
+      "version": "1.0.0",
+      "author": "Jan Dubovsky (JapySoft)",
+      "icon": "assets/astrotools-adv.svg",
+      "subdir": ".",
+      "entrypoint": "astrotools.py",
+      "run": "python3 astrotools.py",
+      "requirements": "requirements.txt",
+      "update_method": "sync",
+      "maintained": true
+    }
+  ]
+}
