@@ -158,3 +158,16 @@ def test_concatenate(qtbot, ws, errors):
 def test_specs_open(qtbot, ws):
     for spec in cm.SPECS:
         qtbot.addWidget(spec.factory(ws))
+
+
+def test_concatenate_mixed_frames(qtbot, ws):
+    ws.put("icrs", SkyCoord(10 * u.deg, 20 * u.deg))
+    ws.put("gal", SkyCoord(120 * u.deg, -20 * u.deg, frame="galactic"))
+    p = make(qtbot, ws, cm.ConcatPanel)
+    for i in range(p.list.count()):
+        p.list.item(i).setSelected(True)
+    p.concat()
+    out = ws.get("combined")
+    assert len(out) == 2 and out.frame.name == "galactic"  # frame of the first (sorted) item
+    assert out[0].l.deg == pytest.approx(120.0)
+    assert out[1].icrs.ra.deg == pytest.approx(10.0)

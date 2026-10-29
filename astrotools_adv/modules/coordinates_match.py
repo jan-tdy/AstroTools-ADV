@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import SkyCoord, concatenate
+from astropy.coordinates import SkyCoord
 from astropy.table import MaskedColumn, Table
 from astropy.time import Time
 from PyQt5.QtWidgets import QAbstractItemView, QListWidget, QWidget
@@ -232,7 +232,10 @@ class ConcatPanel(ModulePanel):
                 raise ParseError("Select at least two SkyCoord objects.")
             parts = [self.ws.get(n) for n in names]
             parts = [p.reshape(-1) if p.isscalar else p for p in parts]
-            combined = concatenate(parts)
+            with offline_iers():
+                parts = [p if p.frame.is_equivalent_frame(parts[0].frame)
+                         else p.transform_to(parts[0].frame) for p in parts]
+                combined = np.concatenate(parts)
             name = self.ws.put(self.form.value("name"), combined)
             self.out.show_text(f"{name}: {len(combined)} coordinates in "
                                f"{type(combined.frame).__name__} from {', '.join(names)}")

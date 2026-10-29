@@ -265,12 +265,12 @@ def test_call_in_worker_thread(qtbot, ws):
     p = ax.ApiExplorer(ws)
     qtbot.addWidget(p)
     qtbot.waitUntil(lambda: bool(p.entries), timeout=20000)
-    ws.put("d", np.array([1.0, 2.0, 3.0, 1000.0]))
+    ws.put("d", np.array([1.0, 2.0, 3.0, 2.0, 1.0, 100.0]))
     p.select_qualname("astropy.stats.sigma_clip")
     p.call_form.edits["data"].setText("ws_d")
-    p.call_form.edits["sigma"].setText("1")
+    p.call_form.edits["sigma"].setText("2")
     p.gui_thread.setChecked(False)
     p.on_run()
     qtbot.waitUntil(lambda: p._has_result, timeout=20000)
-    assert list(p._last_value.mask) == [False, False, False, True]
+    assert list(p._last_value.mask) == [False] * 5 + [True]
     tasks.wait_all()

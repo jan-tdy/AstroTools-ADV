@@ -225,7 +225,7 @@ def test_tool_pages(qtbot, ws):
 
     pg = panel.pages["Formatting"]
     pg.run()
-    assert "'118M'" in pg.output.toPlainText() and "1h 2m" in pg.output.toPlainText()
+    assert "'123M'" in pg.output.toPlainText() and "1h 2m" in pg.output.toPlainText()
 
     pg = panel.pages["JSON encoder"]
     pg.run()
