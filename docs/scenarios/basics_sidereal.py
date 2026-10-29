@@ -1,7 +1,7 @@
 """Local sidereal time and barycentric correction for one observing session."""
 TOOL_KEY = "sidereal_light_time"
 NAME = "basics-sidereal"
-SIZE = (1360, 700)
+SIZE = (1500, 640)
 
 
 def run(panel, ws, h):

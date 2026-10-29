@@ -1,7 +1,7 @@
 """One UTC instant in every time scale."""
 TOOL_KEY = "time_converter"
 NAME = "basics-time-scales"
-SIZE = (1180, 700)
+SIZE = (1320, 700)
 
 
 def run(panel, ws, h):

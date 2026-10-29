@@ -1,9 +1,9 @@
-"""Call astropy.stats.sigma_clip on a workspace array through the API Explorer."""
+"""API Explorer: the Call tab filled in for astropy.stats.sigma_clip."""
 import numpy as np
 
 TOOL_KEY = "api_explorer"
-NAME = "system-api-explorer"
-SIZE = (1360, 760)
+NAME = "system-api-explorer-call"
+SIZE = (1360, 720)
 
 
 def run(panel, ws, h):
@@ -14,12 +14,8 @@ def run(panel, ws, h):
     panel.search.setText("sigma_clip")
     assert "astropy.stats.sigma_clip" in panel.visible_qualnames()
     panel.select_qualname("astropy.stats.sigma_clip")
+    panel.search.setText("sigma_clip")
     panel.call_form.edits["data"].setText("ws_flux")
     panel.call_form.edits["sigma"].setText("2")
     panel.tabs.setCurrentIndex(panel.TAB_CALL)
-    panel.on_run()
-    text = panel.result.toPlainText()
-    assert "mask=[False, False, False, False,  True, False, False]" in text, text
-    code = panel.python_code()
-    assert "sigma_clip(data=ws_flux, sigma=2)" in code, code
-    panel.tabs.setCurrentIndex(panel.TAB_RESULT)
+    assert "sigma_clip(data=ws_flux, sigma=2)" in panel.python_code()

@@ -471,3 +471,12 @@ def test_slice_rejects_single_index_and_swapaxes_validates():
 def test_unsupported_frame_message_lists_working_frames():
     with pytest.raises(parsing.ParseError, match="icrs, fk5, fk4, fk4noeterms, galactic, itrs"):
         wt.build_wcs_from_frame("geocentricmeanecliptic")
+
+
+@pytest.mark.parametrize("proj", wt.FIT_PROJECTIONS)
+def test_every_offered_fit_projection_fits(proj):
+    true = wt.build_wcs(proj, crval=(150.0, 2.0), crpix=(50.5, 50.5), scale_arcsec=1.2, shape=(100, 100))
+    rng = np.random.default_rng(4)
+    x, y = rng.uniform(0, 99, 20), rng.uniform(0, 99, 20)
+    _, res = wt.fit_wcs(x, y, true.pixel_to_world(x, y), proj)
+    assert np.max(res["sep_arcsec"]) < 1e-3
