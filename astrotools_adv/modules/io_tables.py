@@ -71,9 +71,13 @@ def dependency_table() -> Table:
 # --------------------------------------------------------------------------- #
 # ASCII
 # --------------------------------------------------------------------------- #
-def parse_fill_values(text: str) -> List[Tuple[str, str]]:
-    """``'NA:0; --:-1'`` -> ``[('NA', '0'), ('--', '-1')]`` (replace text by value)."""
-    pairs = []
+def parse_fill_values(text: str, allow_masked: bool = False) -> List[Tuple[Any, str]]:
+    """``'NA:0; --:-1'`` -> ``[('NA', '0'), ('--', '-1')]`` (replace text by value).
+
+    With ``allow_masked`` (writing), the key ``masked`` stands for masked values:
+    ``'masked:N/A'`` -> ``[(astropy.io.ascii.masked, 'N/A')]``.
+    """
+    pairs: List[Tuple[Any, str]] = []
     for part in (text or "").replace("\n", ";").split(";"):
         part = part.strip()
         if not part:
@@ -81,7 +85,8 @@ def parse_fill_values(text: str) -> List[Tuple[str, str]]:
         old, sep, new = part.rpartition(":")
         if not sep or not old:
             raise ParseError(f"Bad fill value {part!r}; expected text:replacement, e.g. NA:0")
-        pairs.append((old.strip(), new.strip()))
+        old = old.strip()
+        pairs.append((aascii.masked if allow_masked and old == "masked" else old, new.strip()))
     return pairs
 
 
@@ -159,7 +164,7 @@ def ascii_write(table: Table, fmt: str = "ecsv", path: str = "", overwrite: bool
     if exclude.strip():
         kw["exclude_names"] = split_names(exclude)
     if fill_values.strip():
-        kw["fill_values"] = parse_fill_values(fill_values)
+        kw["fill_values"] = parse_fill_values(fill_values, allow_masked=True)
     if comment.strip():
         kw["comment"] = comment.strip()
     if fmt and fmt != "auto":
@@ -333,7 +338,7 @@ class AsciiPanel(ModulePanel):
         sec.form.add_text("formats", "Column formats", tip="name=%.3f; other=%.2e")
         sec.form.add_text("include", "Include columns", tip="comma-separated")
         sec.form.add_text("exclude", "Exclude columns", tip="comma-separated")
-        sec.form.add_text("fill_values", "Fill values", tip="masked text:replacement")
+        sec.form.add_text("fill_values", "Fill values", tip="Replacement text for output values; 'masked' stands for masked entries, e.g. masked:N/A")
         sec.form.add_text("comment", "Comment prefix")
         sec.form.add_text("extra", "Extra options",
                           tip="e.g. latexdict={'caption': 'My table'}; header_start=1")

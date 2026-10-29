@@ -158,12 +158,15 @@ def resolve_coord(text: str, objs: Dict[str, Any]) -> SkyCoord:
 
 
 _COORD_LIKE = re.compile(r"^[\s\d.+\-:,hdmsHDMS°]+$")
+_NUMBER = re.compile(r"\d+(?:\.\d*)?")
 
 
 def resolve_position(text: str, objs: Dict[str, Any]) -> Any:
     """Like :func:`resolve_coord` but leaves object names as plain strings."""
     text = text.strip()
-    if text in objs or _COORD_LIKE.match(text):
+    # 'M31' or 'HD 12345' fit the character set but are names: a position has two numbers
+    looks_like_position = bool(_COORD_LIKE.match(text)) and len(_NUMBER.findall(text)) >= 2
+    if text in objs or looks_like_position:
         try:
             return resolve_coord(text, objs)
         except ParseError:

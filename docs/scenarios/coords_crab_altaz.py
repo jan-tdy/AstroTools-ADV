@@ -1,6 +1,7 @@
 """Crab Nebula as seen from Cordoba, Spain, on 29 October 2026 at 21:00 UTC."""
 TOOL_KEY = "coord_convert"
 NAME = "coords-crab-altaz"
+SIZE = (1280, 1200)
 
 
 def run(panel, ws, h):
@@ -13,4 +14,4 @@ def run(panel, ws, h):
     h.set(panel, "Height", "120 m", nth=1)
     h.click(panel, "Convert")
     result = h.output_text(panel, "Result")
-    print(result)
+    assert "69.126" in result and "9.1356" in result, result

@@ -506,3 +506,16 @@ def test_query_switch_changes_form_and_help(qtbot, ws):
     assert not p.help_label.isHidden() or p.help_label.text() == ""
     with pytest.raises(KeyError):
         p.select_query("nope")
+
+
+@pytest.mark.parametrize("text", ["M31", "M 31", "HD 12345", "NGC 224"])
+def test_resolve_position_names_never_trigger_local_resolution(text, monkeypatch):
+    """Names that merely look like sexagesimal characters must reach the service as strings."""
+    monkeypatch.setattr(SkyCoord, "from_name",
+                        classmethod(lambda cls, *a, **k: (_ for _ in ()).throw(AssertionError("resolved"))))
+    assert c.resolve_position(text, {}) == text
+
+
+@pytest.mark.parametrize("text", ["10.68 41.27", "00h42m44s +41d16m09s", "10.68, -41.27"])
+def test_resolve_position_parses_real_positions(text):
+    assert isinstance(c.resolve_position(text, {}), SkyCoord)

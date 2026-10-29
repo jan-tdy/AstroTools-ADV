@@ -1,6 +1,7 @@
 """Crab Nebula: ICRS to the old FK4 B1950 system, in sexagesimal form."""
 TOOL_KEY = "coord_convert"
 NAME = "coords-crab-b1950"
+SIZE = (1280, 1200)
 
 
 def run(panel, ws, h):
