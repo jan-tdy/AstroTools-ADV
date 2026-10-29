@@ -211,7 +211,7 @@ def test_visibility_errors(qtbot, ws, errors):
 # ---- moon ----------------------------------------------------------------- #
 def test_moon_illumination_new_and_full():
     new = common.moon_illumination(Time("2024-04-08T18:21:00"))
-    full = common.moon_illumination(Time("2024-04-24T23:49:00"))
+    full = common.moon_illumination(Time("2024-04-23T23:49:00"))
     assert float(new["illumination"]) < 0.01
     assert float(full["illumination"]) > 0.99
     quarter = common.moon_illumination(Time("2024-04-15T19:13:00"))
