@@ -6,7 +6,7 @@ from typing import Callable, Dict, Optional, Tuple
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import (
-    SkyCoord, UnitSphericalRepresentation, angular_separation, golden_spiral_grid, offset_by, position_angle,
+    Angle, SkyCoord, UnitSphericalRepresentation, angular_separation, golden_spiral_grid, offset_by, position_angle,
     uniform_spherical_random_surface,
 )
 from astropy.table import Table
@@ -148,10 +148,12 @@ def op_raw_angle_utils(a: SkyCoord, b: Optional[SkyCoord], pa: u.Quantity, sep: 
     la, ba = a.spherical.lon, a.spherical.lat
     lb, bb = b.spherical.lon, b.spherical.lat
     t = Table()
-    t["angular_separation_deg"] = np.atleast_1d(angular_separation(la, ba, lb, bb).deg)
-    t["position_angle_deg"] = np.atleast_1d(position_angle(la, ba, lb, bb).wrap_at(360 * u.deg).deg)
+    t["angular_separation_deg"] = np.atleast_1d(Angle(angular_separation(la, ba, lb, bb)).deg)
+    t["position_angle_deg"] = np.atleast_1d(
+        Angle(position_angle(la, ba, lb, bb)).wrap_at(360 * u.deg).deg)
     lon2, lat2 = offset_by(la, ba, pa, sep)
-    t["offset_by_lon_deg"], t["offset_by_lat_deg"] = np.atleast_1d(lon2.deg), np.atleast_1d(lat2.deg)
+    t["offset_by_lon_deg"] = np.atleast_1d(Angle(lon2).wrap_at(360 * u.deg).deg)
+    t["offset_by_lat_deg"] = np.atleast_1d(Angle(lat2).deg)
     return t, None
 
 

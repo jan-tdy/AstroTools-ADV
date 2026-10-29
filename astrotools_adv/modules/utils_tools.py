@@ -136,21 +136,20 @@ class IersPanel(ModulePanel):
         self.run(work, self.info.show_text, busy_text="Reading IERS tables ...")
 
     def lookup(self) -> None:
+        self.guard(self._lookup)
+
+    def _lookup(self) -> None:
         source = self.form.value("source")
-
-        def parse() -> Time:
-            return parse_time(self.form.value("time"), scale="utc")
-
-        t = parse()
+        t = parse_time(self.form.value("time"), scale="utc")
 
         def work() -> str:
             tab = self._table(source)
-            ut1_utc, status = tab.ut1_utc(t, return_status=True)
-            x, y = tab.pm_xy(t)
+            ut1_utc, status = tab.ut1_utc(t.jd1, t.jd2, return_status=True)
+            x, y = tab.pm_xy(t.jd1, t.jd2)
             return (f"Time (UTC): {t.iso}   MJD {t.mjd:.6f}\nSource: {source}\n"
                     f"UT1-UTC = {ut1_utc.to(u.s):.6f}\n"
                     f"polar motion x = {x.to(u.arcsec):.6f}, y = {y.to(u.arcsec):.6f}\n"
-                    f"status code: {np.asarray(status).tolist()} (0 = inside table)")
+                    f"status code: {np.asarray(status).tolist()} (0 = inside the table)")
 
         self.run(work, self.info.show_text, busy_text="Looking up ...")
         self.tabs.setCurrentWidget(self.info)
@@ -319,8 +318,7 @@ class DataCachePanel(ModulePanel):
     def check_url(self) -> None:
         pkg, url = self._pkg(), self.form.value("url")
         if not url:
-            raise_parse = ParseError("Enter a URL / key first.")
-            self.fail(raise_parse)
+            self.fail(ParseError("Enter a URL / key first."))
             return
 
         def work() -> str:

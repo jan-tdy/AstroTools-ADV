@@ -107,11 +107,14 @@ def test_make_cutout_pixel_and_sky():
 def test_nddata_panel(qtbot, ws, shown):
     p = panel(qtbot, ws, "nddata")
     p.src.make_test_image()
+    p.form.set_value("kind", "NDDataArray")
+    p.build()
+    assert type(ws.get("nddata")).__name__ == "NDDataArray"
     p.form.set_value("kind", "CCDData")
     p.form.set_value("unc", "StdDev")
     p.build()
     assert not shown
-    assert isinstance(ws.get("nddata"), CCDData)
+    assert isinstance(ws.get("nddata_2"), CCDData)
     assert "StdDevUncertainty" in p.out.toPlainText()
     p.form.set_value("unc_val", "")
     p.form.set_value("unc", "Variance")
@@ -247,6 +250,11 @@ def test_array_utils_panel(qtbot, ws, shown):
     p.apply()
     added = ws.get("util_result_3").data
     assert added[5, 5] == 56.0 and added.sum() == np.arange(100.0).sum() + 9
+    p.form.set_value("op", "subpixel_indices")
+    p.form.set_value("pos", "4.3, 5.5")
+    p.form.set_value("fill", "2")
+    p.apply()
+    assert "subpixel_indices" in p.out.toPlainText() and not shown
     p.form.set_value("shape", "3")
     p.form.set_value("op", "extract_array")
     p.apply()

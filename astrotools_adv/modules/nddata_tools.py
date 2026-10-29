@@ -7,10 +7,10 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import numpy as np
 from astropy import units as u
 from astropy.nddata import (
-    CCDData, Cutout2D, InverseVariance, NDData, NDDataRef, StdDevUncertainty,
+    CCDData, Cutout2D, InverseVariance, NDData, NDDataArray, NDDataRef, StdDevUncertainty,
     UnknownUncertainty, VarianceUncertainty, add_array, bitfield_to_boolean_mask,
     block_reduce, block_replicate, extend_bit_flag_map, extract_array,
-    interpret_bit_flags, overlap_slices,
+    interpret_bit_flags, overlap_slices, subpixel_indices,
 )
 from astropy.stats import sigma_clipped_stats
 
@@ -84,7 +84,8 @@ def build_nddata(src: Any, kind: str = "NDData", unit_text: str = "", unc_kind: 
     wcs = wcs_of(src)
     meta = getattr(src, "meta", None) if isinstance(src, NDData) else None
     meta = meta if meta is not None else {}
-    cls_out = {"NDData": NDData, "NDDataRef": NDDataRef, "CCDData": CCDData}.get(kind)
+    cls_out = {"NDData": NDData, "NDDataArray": NDDataArray, "NDDataRef": NDDataRef,
+               "CCDData": CCDData}.get(kind)
     if cls_out is None:
         raise ParseError(f"Unknown container type {kind!r}.")
     return cls_out(data, uncertainty=uncertainty, mask=mask, wcs=wcs, meta=meta, unit=unit)
@@ -193,7 +194,7 @@ class NDDataPanel(_Base):
     def __init__(self, ws: Workspace) -> None:
         super().__init__(ws)
         f = self.form
-        f.add_combo("kind", "Container", ["NDData", "NDDataRef", "CCDData"],
+        f.add_combo("kind", "Container", ["NDData", "NDDataRef", "NDDataArray", "CCDData"],
                     "CCDData requires a unit (defaults to adu)")
         f.add_text("unit", "Unit", "", "e.g. adu, electron, Jy/beam; empty keeps the source unit")
         f.add_combo("unc", "Uncertainty", list(UNCERTAINTY_TYPES), "Uncertainty class")
@@ -488,7 +489,7 @@ class ArrayUtilsPanel(_Base):
         super().__init__(ws)
         f = self.form
         f.add_combo("op", "Operation", ["slice (NDSlicingMixin)", "overlap_slices", "extract_array",
-                                        "add_array"])
+                                        "add_array", "subpixel_indices"])
         f.add_text("slice", "Slice", "10:50, 20:60", "numpy-style, e.g. '10:50, ::2' (slice op)")
         f.add_text("shape", "Small shape", "20, 20", "'ny, nx' of the small array (overlap/extract)")
         f.add_text("pos", "Position", "5, 5", "'y, x' of the small array centre in the large array")
@@ -527,9 +528,15 @@ class ArrayUtilsPanel(_Base):
             self.out.show_text(describe_nd(res))
             show = image_data(res)
         else:
-            shape = tuple(int(s) for s in self._ints(v.value("shape"), "shape", data.ndim))
             pos = self._ints(v.value("pos"), "position", data.ndim)
             mode = v.value("mode")
+            if op == "subpixel_indices":
+                sub = int(parse_float(v.value("fill"), "subsampling")) if v.value("fill") else 1
+                if sub < 1:
+                    raise ParseError("Subsampling (use the Fill value field) must be >= 1.")
+                self.out.show_text(f"subpixel_indices({pos}, {sub}) = {subpixel_indices(pos, sub)}")
+                return
+            shape = tuple(int(s) for s in self._ints(v.value("shape"), "shape", data.ndim))
             if op == "overlap_slices":
                 big, small = overlap_slices(data.shape, shape, pos, mode=mode)
                 self.out.show_text(f"slices_large = {big}\nslices_small = {small}")
