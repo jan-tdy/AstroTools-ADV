@@ -59,6 +59,11 @@ def test_build_kernel_errors():
             ct.build_kernel(*args)
 
 
+def test_build_kernel_zero_width_is_a_parse_error():
+    with pytest.raises(parsing.ParseError):
+        ct.build_kernel("Box2DKernel", "width=0")
+
+
 def test_kernel_arithmetic():
     a, b = Gaussian2DKernel(2), ct.build_kernel("Box2DKernel", "width=3")
     assert ct.kernel_arithmetic(a, b, "add").array.sum() == pytest.approx(2.0)
@@ -116,6 +121,14 @@ def test_run_convolution_rejects_bad_input():
 
 
 # ---- panels ---------------------------------------------------------------- #
+def test_kernel_panel_opens_ready_to_build(qtbot, ws, shown):
+    """Fresh page: the selected kernel and its default parameters must match."""
+    p = panel(qtbot, ws, "conv_kernels")
+    assert p.form.value("kernel") == "Gaussian2DKernel"
+    p.build()
+    assert not shown and ws.get("kernel").dimension == 2
+
+
 def test_kernel_panel_build_and_arithmetic(qtbot, ws, shown):
     p = panel(qtbot, ws, "conv_kernels")
     p.form.set_value("kernel", "Box2DKernel")
