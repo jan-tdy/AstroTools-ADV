@@ -32,9 +32,10 @@ PROJECTIONS = ["AZP", "SZP", "TAN", "STG", "SIN", "ARC", "ZPN", "ZEA", "AIR", "C
                "MER", "COP", "COE", "COD", "COO", "SFL", "PAR", "MOL", "AIT", "BON", "PCO", "TSC",
                "CSC", "QSC", "HPX", "XPH"]
 PV_DEFAULTS = {**{p: "2_1=45" for p in ("COP", "COE", "COD", "COO", "BON")}, "ZPN": "2_0=0, 2_1=1"}
-# astropy's fit_wcs_from_points cannot start from these (SIN fails at its initial guess, ZPN is not in its
-# list, and the conic projections and BON need PV parameters that the fit does not take).
-FIT_UNSUPPORTED = {"SIN", "ZPN", "COP", "COE", "COD", "COO", "BON"}
+# astropy's fit_wcs_from_points cannot use these: SIN fails at its initial guess, ZPN is not in its
+# list, the conic projections and BON need PV parameters that the fit does not take, and QSC/XPH
+# converge to wrong solutions (checked by tests/test_wcs_tools.py).
+FIT_UNSUPPORTED = {"SIN", "ZPN", "COP", "COE", "COD", "COO", "BON", "QSC", "XPH"}
 FIT_PROJECTIONS = [p for p in PROJECTIONS if p not in FIT_UNSUPPORTED]
 FRAMES = {"ICRS (RA/Dec)": ("RA", "DEC", "ICRS"), "Galactic (l/b)": ("GLON", "GLAT", None),
           "Ecliptic (lon/lat)": ("ELON", "ELAT", None)}
@@ -664,7 +665,7 @@ class FitPanel(ModulePanel):
         f.add_widget("table", "Table", self.table_combo)
         f.add_text("cols", "Columns", "x, y, ra, dec", "x, y, lon, lat (degrees)")
         f.add_combo("proj", "Projection", FIT_PROJECTIONS, "projections astropy can fit (no SIN, ZPN, "
-                    "conic or BON)", current="TAN")
+                    "conic, BON, QSC, XPH)", current="TAN")
         f.add_int("sip", "SIP degree", 0, 0, 5, "0: no distortion terms")
         f.add_text("pp", "Projection point", "center", "'center' or 'ra dec'")
         f.add_text("name", "Store as", "fitted_wcs")

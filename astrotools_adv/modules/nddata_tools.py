@@ -556,9 +556,11 @@ class ArrayUtilsPanel(_Base):
             pos = self._ints(v.value("pos"), "position", data.ndim)
             mode = v.value("mode")
             if op == "subpixel_indices":
-                sub = int(parse_float(v.value("fill"), "subsampling")) if v.value("fill") else 1
-                if sub < 1:
-                    raise ParseError("Subsampling (use the Fill value field) must be >= 1.")
+                raw = parse_float(v.value("fill"), "subsampling") if v.value("fill") else 1.0
+                if not np.isfinite(raw) or raw < 1 or raw != int(raw):
+                    raise ParseError("Enter the subsampling factor, a whole number >= 1, in the "
+                                     "Fill value field.")
+                sub = int(raw)
                 self.out.show_text(f"subpixel_indices({pos}, {sub}) = {subpixel_indices(pos, sub)}")
                 return
             shape = tuple(int(s) for s in self._ints(v.value("shape"), "shape", data.ndim))

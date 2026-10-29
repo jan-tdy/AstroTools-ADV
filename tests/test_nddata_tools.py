@@ -254,6 +254,11 @@ def test_array_utils_panel(qtbot, ws, shown):
     p.form.set_value("fill", "2")
     p.apply()
     assert "subpixel_indices" in p.out.toPlainText() and not shown
+    for bad in ("nan", "0", "2.5"):  # nan is the field's default for other operations
+        p.form.set_value("fill", bad)
+        p.apply()
+        assert "whole number" in str(shown[-1])
+    shown.clear()
     p.form.set_value("shape", "3")
     p.form.set_value("op", "extract_array")
     p.apply()
