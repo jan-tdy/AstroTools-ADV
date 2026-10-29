@@ -290,7 +290,7 @@ class FrameInput(QGroupBox):
         self.equinox.setPlaceholderText("default (e.g. J2000, B1950, 2020-01-01)")
         self.obstime = QLineEdit()
         self.obstime.setPlaceholderText("default (ISO, 'now', J2015.5)")
-        self.location = LocationInput(ws, "Observer (for AltAz, HADec, ITRS, CIRS, TETE)")
+        self.location = LocationInput(ws, "Observer (for AltAz and HADec)")
         self.pressure = QLineEdit("0")
         self.temperature = QLineEdit("10")
         self.humidity = QLineEdit("0")

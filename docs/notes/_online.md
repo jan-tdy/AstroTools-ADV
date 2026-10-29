@@ -35,7 +35,7 @@ and the status bar shows `Offline mode`. The switch is not saved; it is off ever
 
 ## Timeout
 
-**Timeout (s)** (default 30) is handed to the service object before each query. It limits the time to connect and receive an answer; it does not cap a query that the server accepted and is still computing. If a query times out you get a `Network error` message in the **Info** tab and can raise the value.
+**Timeout (s)** (default 30) is handed to the service object before each query. It limits the time to connect and receive an answer; it does not cap a query that the server accepted and is still computing. It is applied to SIMBAD, VizieR, JPL Horizons, NED, SDSS, IRSA Dust, the Minor Planet Center, the NASA Exoplanet Archive, CDS XMatch, SVO and the spectral line databases. **It has no effect on Gaia, MAST, SkyView and the JPL Small-Body Database**, whose astroquery clients use their own built-in timeouts. If a query times out you get a `Network error` message in the **Info** tab; raise the value and run again.
 
 ## Values the fields accept
 
