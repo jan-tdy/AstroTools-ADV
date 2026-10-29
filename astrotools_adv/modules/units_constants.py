@@ -64,15 +64,21 @@ MAX_LISTED = 15
 # --------------------------------------------------------------------------- #
 # Pure helpers (no Qt) -- also used by the tests
 # --------------------------------------------------------------------------- #
+_NUMBER_THEN_UNIT = re.compile(r"^\s*([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)\s+(\S.*)$")
+
+
 def read_quantity(text: str, default_unit: Any = None, name: str = "value") -> u.Quantity:
-    """:func:`parse_quantity` plus astropy's own string syntax (``'3 m**2'``)."""
+    """:func:`parse_quantity` plus ``'3 m**2'`` and function units (``'5 mag(AB)'``)."""
     try:
         return parse_quantity(text, default_unit, name)
     except ParseError as first:
-        try:
-            return u.Quantity((text or "").strip())
-        except Exception:  # noqa: BLE001
-            raise first from None
+        m = _NUMBER_THEN_UNIT.match((text or "").replace(",", "."))
+        if m:
+            try:
+                return float(m.group(1)) * u.Unit(m.group(2).strip())
+            except (ValueError, TypeError):
+                pass
+        raise first from None
 
 
 def format_value(value: Any) -> str:

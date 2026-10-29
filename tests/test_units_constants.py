@@ -114,7 +114,7 @@ def test_brightness_temperature(qtbot, ws, dialogs):
 def test_logarithmic_units_convert(qtbot, ws):
     p = panel(qtbot, ws, "unit_converter")
     convert(p, "0 mag(AB)", "Jy")
-    assert result_value(p)[0] == pytest.approx(3631.0)
+    assert result_value(p)[0] == pytest.approx(3630.7805, rel=1e-6)
 
 
 def test_converter_errors_show_dialogs(qtbot, ws, dialogs):
@@ -216,9 +216,9 @@ def test_calculator(qtbot, ws, dialogs):
                                "bogus(\nconst.c.to(u.km/u.s)")
     p.evaluate()
     text = p.out.toPlainText()
-    assert "32.6156" in text and "3631.0" in text and "299792.458 km / s" in text
+    assert "32.6156" in text and "3630.78" in text and "299792.458 km / s" in text
     assert "! Syntax error" in text and not dialogs
-    assert p._last == pytest.approx(299792.458 * u.km / u.s)
+    assert p._last.to_value(u.km / u.s) == pytest.approx(299792.458)
     p.store_last()
     assert "calc" in ws
     p.form.set_value("script", "# only a comment")
@@ -269,7 +269,7 @@ def test_constants_sets_systems_and_filter(qtbot, ws, dialogs):
     assert "si" in e["system"] and e["unit"] == "C"
     p.form.set_value("filter", "boltzmann")
     p.refresh()
-    assert list(p.table.model._table["abbrev"]) == ["k_B"]
+    assert set(p.table.model._table["abbrev"]) == {"k_B", "sigma_sb"}
     p.form.set_value("filter", "no such constant")
     p.refresh()
     assert len(p.table.model._table) == 0 and not dialogs

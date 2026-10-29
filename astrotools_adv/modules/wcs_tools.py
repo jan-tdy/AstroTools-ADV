@@ -246,6 +246,10 @@ def transform_points(w: WCS, pts: np.ndarray, direction: str, origin: int = 0, m
 
 def highlevel_transform(w: WCS, text: str, direction: str) -> Table:
     """High-level API for celestial (SkyCoord) and 1-D spectral (SpectralCoord) WCS."""
+    try:
+        w.wcs.set()
+    except Exception as exc:  # noqa: BLE001
+        raise ParseError(f"Invalid WCS: {exc}") from exc
     celestial = w.naxis == 2 and w.has_celestial
     spectral = w.naxis == 1 and w.has_spectral
     if not (celestial or spectral):

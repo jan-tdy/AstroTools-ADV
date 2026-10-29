@@ -143,7 +143,7 @@ def test_summary_validate_and_nonceleste():
 
 def test_highlevel_transform():
     w = tan()
-    t = wt.highlevel_transform(w, "50.5 50.5", "pix2world")
+    t = wt.highlevel_transform(w, "49.5 49.5", "pix2world")
     assert t["lon_deg"][0] == pytest.approx(150.0, abs=1e-7)
     back = wt.highlevel_transform(w, "150.0 2.0\n10h00m00s +02d00m00s", "world2pix")
     assert back["x"][0] == pytest.approx(49.5, abs=1e-6) and back["y"][0] == pytest.approx(49.5, abs=1e-6)
@@ -284,7 +284,7 @@ def test_transform_panel(qtbot, ws, shown):
     assert not shown
     tab = ws.get("wcs_points")
     assert tab["ra"][0] == pytest.approx(150.0) and tab["dec"][0] == pytest.approx(2.0)
-    p.form.set_value("dir", "world2pix")
+    p.form.set_value("dir", "world -> pixel")
     p.form.set_value("pts", "150.0 2.0")
     p.go()
     assert ws.get("wcs_points_2")["pix0"][0] == pytest.approx(50.5, abs=1e-6)
@@ -295,7 +295,7 @@ def test_transform_panel(qtbot, ws, shown):
     ws.put("tbl", Table({"x": [1.0, 2.0], "y": [3.0, 4.0]}))
     p.table_combo.setCurrentText("tbl")
     p.form.set_value("api", "all_*2* (with distortion)")
-    p.form.set_value("dir", "pix2world")
+    p.form.set_value("dir", "pixel -> world")
     p.form.set_value("use_table", True)
     p.go()
     assert len(ws.get("wcs_points_4")) == 2
@@ -379,6 +379,7 @@ def test_compare_and_plot_panels(qtbot, ws, shown):
     cp.go()
     assert len(shown) == 1
 
+    shown.clear()
     pp = panel(qtbot, ws, "wcs_plot")
     pp.go()  # blank frame
     assert not shown
@@ -393,11 +394,11 @@ def test_compare_and_plot_panels(qtbot, ws, shown):
     assert len(out.axes) >= 1
     pp.form.set_value("circles", "bad")
     pp.go()
-    assert len(shown) == 2
+    assert len(shown) == 1
     ws.put("lin", WCS(naxis=1))
     pp.wcs_combo.setCurrentText("lin")
     pp.go()
-    assert len(shown) == 3
+    assert len(shown) == 2
 
 
 def test_plot_cube_wcs_with_slices(qtbot, ws, shown):

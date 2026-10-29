@@ -6,13 +6,13 @@ from typing import Callable, Dict, Optional, Tuple
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import (
-    SkyCoord, angular_separation, golden_spiral_grid, offset_by, position_angle,
+    SkyCoord, UnitSphericalRepresentation, angular_separation, golden_spiral_grid, offset_by, position_angle,
     uniform_spherical_random_surface,
 )
 from astropy.table import Table
 from PyQt5.QtWidgets import QWidget
 
-from ..core.parsing import ParseError, parse_angle, parse_float
+from ..core.parsing import ParseError, parse_angle
 from ..core.registry import ModuleSpec
 from ..core.widgets import ModulePanel
 from ..core.workspace import Workspace
@@ -110,7 +110,6 @@ def op_great_circle(a: SkyCoord, b: Optional[SkyCoord], n: int = 11, **_: object
     frac = np.linspace(0.0, 1.0, n)
     pts = _flat(a0.directional_offset_by(pa, sep * frac))
     t = _table_of(pts)
-    t.insert_column(0, frac, name="fraction") if False else None
     t["fraction"] = frac
     t["from_A_deg"] = (sep * frac).deg
     return t, pts
@@ -123,8 +122,7 @@ def op_uniform_sphere(a: SkyCoord, b: Optional[SkyCoord], n: int = 100, seed: in
     state = np.random.get_state()
     try:
         np.random.seed(seed % 2**32)
-        lon, lat = uniform_spherical_random_surface(n)[:2] if False else _lonlat(
-            uniform_spherical_random_surface(n))
+        lon, lat = _lonlat(uniform_spherical_random_surface(n))
     finally:
         np.random.set_state(state)
     sc = SkyCoord(lon, lat, frame="icrs")
@@ -139,7 +137,7 @@ def op_golden_spiral(a: SkyCoord, b: Optional[SkyCoord], n: int = 100, **_: obje
 
 
 def _lonlat(rep) -> Tuple[u.Quantity, u.Quantity]:
-    sph = rep.represent_as("unitspherical")
+    sph = rep.represent_as(UnitSphericalRepresentation)
     return sph.lon, sph.lat
 
 

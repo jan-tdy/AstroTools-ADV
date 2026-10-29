@@ -375,6 +375,8 @@ def compute_robust(data: np.ndarray, c_loc: float, c_scale: float, M: Optional[f
                    modify: bool, matrix: Optional[np.ndarray]) -> Dict[str, Any]:
     data = need_finite(data, 1)  # NaN/inf are dropped
     ignore_nan = False
+    if M is not None:
+        M = np.asarray(M, dtype=float)  # astropy expects an array here
     res: Dict[str, Any] = {"data": data}
     res["biweight_location"] = ast_stats.biweight_location(data, c=c_loc, M=M, ignore_nan=ignore_nan)
     res["biweight_scale"] = ast_stats.biweight_scale(data, c=c_scale, M=M, modify_sample_size=modify,
@@ -613,7 +615,9 @@ def compute_poisson(n: np.ndarray, interval: str, sigma: float, background: floa
     if interval == "kraft-burrows-nousek":
         if conf is None or n.size != 1:
             raise ParseError("kraft-burrows-nousek needs a single count and a confidence level.")
-        lo, hi = ast_stats.poisson_conf_interval(n[0], interval, background=background,
+        if n[0] != int(n[0]):
+            raise ParseError("kraft-burrows-nousek needs an integer count.")
+        lo, hi = ast_stats.poisson_conf_interval(int(n[0]), interval, background=background,
                                                  confidence_level=conf)
         lo, hi = np.atleast_1d(lo), np.atleast_1d(hi)
     else:
@@ -1165,9 +1169,10 @@ class RipleyPanel(ModulePanel):
                  self.r_in.array(), v["mode"])
 
     def _show(self, r: Dict[str, Any]) -> None:
+        dev = np.abs(r["L"] - r["radii"])
+        peak = f"{np.nanmax(dev):.6g}" if np.isfinite(dev).any() else "n/a (K undefined for these radii/mode)"
         self.out.show_text(f"{r['n']} points, region {fmt(r['region'])}, mode {r['mode']}\n"
-                           f"max |L(r) - r| = {np.nanmax(np.abs(r['L'] - r['radii'])):.6g}"
-                           + _warn_text(r["warnings"]))
+                           f"max |L(r) - r| = {peak}" + _warn_text(r["warnings"]))
         fig = self.canvas.figure
         fig.clear()
         ax1, ax2 = fig.subplots(1, 2)
