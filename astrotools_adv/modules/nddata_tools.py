@@ -13,6 +13,7 @@ from astropy.nddata import (
     interpret_bit_flags, overlap_slices, subpixel_indices,
 )
 from astropy.stats import sigma_clipped_stats
+from astropy.wcs import WCSCOMPARE_ANCILLARY
 
 from ..core.parsing import (ParseError, parse_array, parse_float, parse_int, parse_quantity,
                             parse_skycoord, parse_unit, safe_eval)
@@ -419,10 +420,19 @@ class BitMaskPanel(ModulePanel):
 
 
 def wcs_strictly_equal(a: Any, b: Any) -> bool:
-    """compare_wcs callable: equal WCS (or both absent) pass, anything else is an error."""
+    """compare_wcs callable: equal WCS (or both absent) pass, anything else is an error.
+
+    ``Wcsprm.compare`` treats a WCS whose derived state has not been computed as different
+    from an identical, already-set copy, so both sides are set on copies first.
+    """
     if a is None and b is None:
         return True
-    return a is not None and b is not None and bool(a.wcs.compare(b.wcs))
+    if a is None or b is None:
+        return False
+    a, b = a.deepcopy(), b.deepcopy()
+    a.wcs.set()
+    b.wcs.set()
+    return bool(a.wcs.compare(b.wcs, cmp=WCSCOMPARE_ANCILLARY, tolerance=1e-12))
 
 
 class ArithmeticPanel(ModulePanel):

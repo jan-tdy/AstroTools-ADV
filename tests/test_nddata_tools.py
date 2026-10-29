@@ -320,3 +320,18 @@ def test_poisson_uncertainty_follows_the_selected_class():
     assert np.allclose(std.uncertainty.array, [[0, 2], [4, 5]])
     assert np.allclose(var.uncertainty.array, [[0, 4], [16, 25]])
     assert np.allclose(inv.uncertainty.array, [[0, 0.25], [1 / 16, 0.04]])
+
+
+def test_wcs_strictly_equal_ignores_unset_state():
+    w1 = WCS(naxis=2)
+    w1.wcs.ctype = ["RA---TAN", "DEC--TAN"]
+    w1.wcs.crval = [10, 41]
+    w1.wcs.crpix = [1, 1]
+    w1.wcs.cdelt = [-0.001, 0.001]
+    same = w1.deepcopy()
+    other = w1.deepcopy()
+    other.wcs.crval = [11, 41]
+    assert nt.wcs_strictly_equal(w1, same)
+    assert not nt.wcs_strictly_equal(w1, other)
+    assert nt.wcs_strictly_equal(None, None)
+    assert not nt.wcs_strictly_equal(w1, None)

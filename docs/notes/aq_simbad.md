@@ -15,7 +15,7 @@ Pick a **query mode** in the drop-down under the description. Required fields ar
 | Objects of a bibcode | **Bibcode** `*`, for example `2005A&A...430..165F` | Objects cited in that paper |
 | Reference by bibcode | **Bibcode** `*`; optionally **Wildcard**, **Abstract** | The reference record |
 | Identifiers of object | **Object name** `*` | All identifiers of one object |
-| Hierarchy (parents/children) | **Object name** `*`, **Relation** (`parents`, `children`, `siblings`), **Detailed** | Related objects |
+| Hierarchy (parents/children) | **Object name** `*`, **Relation** (`parents`, `children`, `siblings`), **Detailed**, **Max rows** | Related objects |
 | ADQL (TAP) | **ADQL query** `*`, **Max records** | Whatever your query selects |
 | Show tables | nothing | The tables of the SIMBAD TAP service |
 | Show columns | **Tables** `*`, **Keyword** | Column names and descriptions |
@@ -32,7 +32,7 @@ Pick a **query mode** in the drop-down under the description. Required fields ar
 
 ## Reading the results
 
-The **Table** tab holds one row per object. The default columns identify the object and give its position and a few basic properties; the columns you add through **Extra fields** follow them. **Info** shows the row and column counts. A search with no hits shows `(no rows returned)`.
+The **Table** tab holds one row per object. The columns are SIMBAD's default output (the main identifier and the coordinates are among them); anything you request through **Extra fields** follows. **Info** shows the row and column counts. A search with no hits shows `(no rows returned)`.
 
 **ADQL criteria** is an extra condition written in the ADQL syntax and added to the query, for example `otype = 'G..'` to keep only galaxies. Column names are those of SIMBAD's `basic` table; **Show columns** with Tables set to `basic` lists them.
 
@@ -42,6 +42,6 @@ The **Table** tab holds one row per object. The default columns identify the obj
 - In **Query region** the **Coordinates** field resolves a typed object name through CDS Sesame before the query is sent. In **Query object** the name goes to SIMBAD unchanged.
 - **Wildcard** makes `*` and `?` in the name act as wildcards.
 - **ADQL (TAP)** sends your text as written. **Max records** (default 10000) caps the number of rows the server returns. The default query is `SELECT TOP 10 main_id, ra, dec FROM basic`.
-- Creating the SIMBAD client contacts the server to read its limits, so even an invalid query fails with a `Network error` when you are not connected.
+- Creating the SIMBAD client already contacts the server (to read its limits), so every query that passes input checking fails with a `Network error` when you are not connected, whatever its content.
 - The page creates a fresh client for every query, so **Extra fields** never carry over to the next run.
 - Other SIMBAD functionality is reachable from the [Astroquery Browser](astroquery_browser.md) (service `simbad`).
