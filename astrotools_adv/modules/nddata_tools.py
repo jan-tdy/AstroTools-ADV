@@ -36,6 +36,20 @@ BLOCK_FUNCS: Dict[str, Callable[..., Any]] = {
 # --------------------------------------------------------------------------- #
 # Pure helpers (unit-tested without any GUI)
 # --------------------------------------------------------------------------- #
+def poisson_values(counts: np.ndarray, unc_kind: str) -> np.ndarray:
+    """Poisson noise of ``counts`` expressed in the convention of the uncertainty class.
+
+    StdDev/Unknown: sqrt(|n|); Variance: |n|; InverseVariance: 1/|n| (0 where n is 0,
+    i.e. no weight, instead of an infinite one).
+    """
+    n = np.abs(counts)
+    if unc_kind == "Variance":
+        return n
+    if unc_kind == "InverseVariance":
+        return np.divide(1.0, n, out=np.zeros_like(n), where=n > 0)
+    return np.sqrt(n)
+
+
 def build_nddata(src: Any, kind: str = "NDData", unit_text: str = "", unc_kind: str = "none",
                  unc_text: str = "", mask_text: str = "") -> NDData:
     """Create NDData / NDDataRef / CCDData from an array-like or NDData ``src``."""
@@ -60,7 +74,7 @@ def build_nddata(src: Any, kind: str = "NDData", unit_text: str = "", unc_kind: 
                 raise ParseError("Give an uncertainty value, an expression in 'data', or 'poisson'.")
         else:
             if text.lower() == "poisson":
-                values = np.sqrt(np.abs(data.astype(float)))
+                values = poisson_values(data.astype(float), unc_kind)
             else:
                 values = np.asarray(safe_eval(text, {"data": data.astype(float)}), dtype=float)
             try:
@@ -199,7 +213,8 @@ class NDDataPanel(_Base):
         f.add_text("unit", "Unit", "", "e.g. adu, electron, Jy/beam; empty keeps the source unit")
         f.add_combo("unc", "Uncertainty", list(UNCERTAINTY_TYPES), "Uncertainty class")
         f.add_text("unc_val", "Unc. value", "poisson",
-                   "number, expression in 'data' (e.g. 0.1*data), or 'poisson' (sqrt|data|)")
+                   "number, expression in 'data' (e.g. 0.1*data), or 'poisson' (photon noise of |data| in the "
+                   "chosen class: sqrt|data| for StdDev, |data| for Variance, 1/|data| for InverseVariance)")
         f.add_text("mask", "Mask", "", "empty: none, 'nonfinite', or expression like data > 60000")
         f.add_text("name", "Store as", "nddata", "workspace name")
         self.out = self.add_output("Summary")

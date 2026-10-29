@@ -1,7 +1,7 @@
 """VizieR panel with a box region query filled in (not executed: it needs the network)."""
 TOOL_KEY = "aq_vizier"
 NAME = "online-vizier-form"
-SIZE = (1280, 760)
+SIZE = (1280, 880)
 
 
 def run(panel, ws, h):

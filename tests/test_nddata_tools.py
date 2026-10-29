@@ -310,3 +310,13 @@ def test_all_nan_and_tiny_inputs_do_not_crash(qtbot, ws, shown):
 def test_specs_are_images_category():
     assert {s.category for s in nt.SPECS} == {"Images"}
     assert len({s.key for s in nt.SPECS}) == len(nt.SPECS)
+
+
+def test_poisson_uncertainty_follows_the_selected_class():
+    data = np.array([[0.0, 4.0], [16.0, 25.0]])
+    std = nt.build_nddata(data, "NDDataRef", "adu", "StdDev", "poisson")
+    var = nt.build_nddata(data, "NDDataRef", "adu", "Variance", "poisson")
+    inv = nt.build_nddata(data, "NDDataRef", "adu", "InverseVariance", "poisson")
+    assert np.allclose(std.uncertainty.array, [[0, 2], [4, 5]])
+    assert np.allclose(var.uncertainty.array, [[0, 4], [16, 25]])
+    assert np.allclose(inv.uncertainty.array, [[0, 0.25], [1 / 16, 0.04]])
