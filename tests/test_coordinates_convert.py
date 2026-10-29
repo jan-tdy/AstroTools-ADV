@@ -126,6 +126,16 @@ def test_galactocentric_parameters(qtbot, ws):
     assert abs(p.table["x"][0]) < 0.05 and abs(p.table["y"][0]) < 0.05
 
 
+def test_spherical_columns_of_cartesian_frames_are_lon_lat(qtbot, ws):
+    p = make(qtbot, ws, cc.ConverterPanel)
+    p.inp.text.setPlainText("10 20")
+    p.inp.distance.setText("8 kpc")
+    p.target.frame.setCurrentText("Galactocentric")
+    p.form.set_value("rep", "spherical")
+    p.convert()
+    assert p.table.colnames == ["lon", "lat", "distance"]
+
+
 def test_table_source(qtbot, ws):
     ws.put("cat", Table({"RAJ2000": [10.0, 20.0], "DEJ2000": [1.0, 2.0],
                          "plx": [10.0, 5.0]}))

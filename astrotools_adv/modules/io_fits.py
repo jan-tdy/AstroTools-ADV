@@ -363,7 +363,7 @@ class FitsPanel(ModulePanel):
         sec.form.add_check("memmap", "Memory-map", True,
                            "Map the data from disk instead of reading it all (large files)")
         sec.form.add_check("lazy", "Lazy HDU loading", True)
-        sec.add_button("Open", lambda: self.open_file(sec.form))
+        sec.add_button("Open", lambda sec=sec: self.open_file(sec.form))
         sec.add_button("New (empty primary HDU)", self.new_file)
         sec.add_button("Close", self.close_file)
         self.file_sec = sec
@@ -375,8 +375,8 @@ class FitsPanel(ModulePanel):
         sec.form.add_check("overwrite", "Overwrite", False)
         sec.form.add_check("checksum", "Write CHECKSUM/DATASUM", False)
         sec.form.add_combo("verify", "Output verify", VERIFY_OPTIONS)
-        sec.add_button("Save as...", lambda: self.save_as(sec.form))
-        sec.add_button("Write back to opened file", lambda: self.write_back(sec.form),
+        sec.add_button("Save as...", lambda sec=sec: self.save_as(sec.form))
+        sec.add_button("Write back to opened file", lambda sec=sec: self.write_back(sec.form),
                        "Replaces the opened file (via a temporary file) and reloads it")
         self.save_sec = sec
 
@@ -387,10 +387,10 @@ class FitsPanel(ModulePanel):
         sec.form.add_text("value", "Value", tip="5, 1.5, T/F; wrap in quotes to force a string")
         sec.form.add_text("comment", "Comment")
         sec.add_button("Show header", self.show_header)
-        sec.add_button("Set / add card", lambda: self.set_card(sec.form))
-        sec.add_button("Delete card", lambda: self.delete_card(sec.form))
-        sec.add_button("Add HISTORY (Value)", lambda: self.add_text_card(sec.form, "HISTORY"))
-        sec.add_button("Add COMMENT (Value)", lambda: self.add_text_card(sec.form, "COMMENT"))
+        sec.add_button("Set / add card", lambda sec=sec: self.set_card(sec.form))
+        sec.add_button("Delete card", lambda sec=sec: self.delete_card(sec.form))
+        sec.add_button("Add HISTORY (Value)", lambda sec=sec: self.add_text_card(sec.form, "HISTORY"))
+        sec.add_button("Add COMMENT (Value)", lambda sec=sec: self.add_text_card(sec.form, "COMMENT"))
         self.header_sec = sec
 
         # -- image
@@ -404,8 +404,8 @@ class FitsPanel(ModulePanel):
         sec.form.add_float("hi", "High percentile", 100.0, 0.0, 100.0, 2)
         sec.form.add_text("vmin", "vmin", tip="Overrides the low percentile")
         sec.form.add_text("vmax", "vmax", tip="Overrides the high percentile")
-        sec.add_button("Preview", lambda: self.preview(sec.form))
-        sec.add_button("Pixel statistics", lambda: self.pixel_stats(sec.form))
+        sec.add_button("Preview", lambda sec=sec: self.preview(sec.form))
+        sec.add_button("Pixel statistics", lambda sec=sec: self.pixel_stats(sec.form))
         self.image_sec = sec
 
         # -- data transfer
@@ -419,12 +419,12 @@ class FitsPanel(ModulePanel):
         sec.form.add_float("quantize", "Quantize level", 0.0, 0.0, 1e6, 2,
                            tip="Float images: RICE/HCOMPRESS are lossy (level 0 rounds to integers); "
                            "use GZIP_1/GZIP_2 with 0 for lossless storage")
-        sec.add_button("HDU -> Table", lambda: self.hdu_to_table(sec.form))
-        sec.add_button("HDU -> NDData", lambda: self.hdu_to_nddata(sec.form))
-        sec.add_button("HDU -> array", lambda: self.hdu_to_array(sec.form))
+        sec.add_button("HDU -> Table", lambda sec=sec: self.hdu_to_table(sec.form))
+        sec.add_button("HDU -> NDData", lambda sec=sec: self.hdu_to_nddata(sec.form))
+        sec.add_button("HDU -> array", lambda sec=sec: self.hdu_to_array(sec.form))
         sec.add_button("Table columns (FITS_rec)", self.show_columns)
-        sec.add_button("Append object as new HDU", lambda: self.append_hdu(sec.form))
-        sec.add_button("Replace selected HDU with object", lambda: self.replace_hdu(sec.form))
+        sec.add_button("Append object as new HDU", lambda sec=sec: self.append_hdu(sec.form))
+        sec.add_button("Replace selected HDU with object", lambda sec=sec: self.replace_hdu(sec.form))
         sec.add_button("Delete selected HDU", self.delete_hdu)
         self.data_sec = sec
 
@@ -436,10 +436,10 @@ class FitsPanel(ModulePanel):
         sec.form.add_float("rtol", "rtol", 0.0, 0.0, 1e6, 8)
         sec.form.add_float("atol", "atol", 0.0, 0.0, 1e6, 8)
         sec.form.add_text("ignore", "Ignore keywords", "", "comma-separated, e.g. DATE,CHECKSUM")
-        sec.add_button("verify() in-memory file", lambda: self.verify_memory(sec.form))
-        sec.add_button("Add CHECKSUM + DATASUM", lambda: self.add_checksum(sec.form))
+        sec.add_button("verify() in-memory file", lambda sec=sec: self.verify_memory(sec.form))
+        sec.add_button("Add CHECKSUM + DATASUM", lambda sec=sec: self.add_checksum(sec.form))
         sec.add_button("Verify checksums on disk", self.verify_disk)
-        sec.add_button("FITSDiff (opened file vs. other)", lambda: self.diff(sec.form))
+        sec.add_button("FITSDiff (opened file vs. other)", lambda sec=sec: self.diff(sec.form))
         self.int_sec = sec
 
         # -- quick functions
@@ -448,11 +448,11 @@ class FitsPanel(ModulePanel):
         sec.form.add_text("key", "Keyword")
         sec.form.add_text("value", "Value")
         sec.form.add_text("name", "Workspace name", "fits_getdata")
-        sec.add_button("getval", lambda: self.getval(sec.form))
-        sec.add_button("setval (modifies file!)", lambda: self.setval(sec.form),
+        sec.add_button("getval", lambda sec=sec: self.getval(sec.form))
+        sec.add_button("setval (modifies file!)", lambda sec=sec: self.setval(sec.form),
                        "Writes the card straight into the file on disk")
-        sec.add_button("getheader", lambda: self.getheader(sec.form))
-        sec.add_button("getdata -> workspace", lambda: self.getdata(sec.form))
+        sec.add_button("getheader", lambda sec=sec: self.getheader(sec.form))
+        sec.add_button("getdata -> workspace", lambda sec=sec: self.getdata(sec.form))
         self.quick_sec = sec
         self._refresh()
 

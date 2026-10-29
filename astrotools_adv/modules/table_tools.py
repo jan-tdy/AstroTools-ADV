@@ -787,14 +787,14 @@ class TableManager(TablePanel):
         sec.form.add_text("opts", "Options", tip="key=value; key=value  (e.g. hdu=2; "
                           "delimiter=','; path='data' for HDF5)")
         sec.form.add_text("name", "Store as", "table1")
-        sec.add_button("Open", lambda: self.open_file(sec.form))
+        sec.add_button("Open", lambda sec=sec: self.open_file(sec.form))
         self.open_sec = sec
         # -- paste
         sec = Section(self, "Create from pasted text")
         sec.form.add_multiline("text", "Text", "a,b\n1,2\n3,4", height=100,
                                tip="CSV or any text astropy.io.ascii can guess")
         sec.form.add_text("name", "Store as", "pasted")
-        sec.add_button("Create", lambda: self.create_text(sec.form))
+        sec.add_button("Create", lambda sec=sec: self.create_text(sec.form))
         # -- inspect
         sec = Section(self, "Inspect selected table")
         sec.form.add_int("row", "Row", 0, 0, 10**9)
@@ -802,13 +802,13 @@ class TableManager(TablePanel):
         sec.add_button("Column statistics (info)", lambda: self.show_info("stats"))
         sec.add_button("Describe", self.show_describe)
         sec.add_button("Formatted text (pformat)", self.show_pformat)
-        sec.add_button("Row detail", lambda: self.show_row(sec.form))
+        sec.add_button("Row detail", lambda sec=sec: self.show_row(sec.form))
         sec.add_button("Table metadata", self.show_meta)
         # -- pandas
         sec = Section(self, "pandas")
         sec.form.add_text("name", "Store as", "dataframe")
-        sec.add_button("Table -> pandas DataFrame", lambda: self.to_pandas(sec.form))
-        sec.add_button("Workspace DataFrame -> Table", lambda: self.from_pandas(sec.form))
+        sec.add_button("Table -> pandas DataFrame", lambda sec=sec: self.to_pandas(sec.form))
+        sec.add_button("Workspace DataFrame -> Table", lambda sec=sec: self.from_pandas(sec.form))
         # -- save
         sec = Section(self, "Save selected table")
         self.save_path = PathEdit("save")
@@ -817,7 +817,7 @@ class TableManager(TablePanel):
                            tip="'auto' picks the format from the file extension")
         sec.form.add_text("opts", "Options", tip="key=value; key=value (e.g. path='t' for HDF5)")
         sec.form.add_check("overwrite", "Overwrite", False)
-        sec.add_button("Save", lambda: self.save_file(sec.form))
+        sec.add_button("Save", lambda sec=sec: self.save_file(sec.form))
 
     # ---- open / create ------------------------------------------------------- #
     def open_file(self, form: ParamForm) -> None:
@@ -927,7 +927,7 @@ class TableEditor(TablePanel):
         sec.form.add_text("expr", "Expression", tip="e.g. a * u.m, sqrt(x**2 + y**2)")
         sec.form.add_text("unit", "Unit", tip="optional; converts a Quantity result, or "
                           "declares the unit of a plain result")
-        sec.add_button("Add / replace column", lambda: self.add_column(sec.form))
+        sec.add_button("Add / replace column", lambda sec=sec: self.add_column(sec.form))
 
         sec = Section(self, "Selected column")
         sec.form.add_text("new", "New name")
@@ -936,18 +936,18 @@ class TableEditor(TablePanel):
         sec.form.add_text("desc", "Description", tip="'-' clears")
         sec.form.add_text("to", "Convert to unit", tip="e.g. km/s")
         sec.form.add_text("rm", "Remove columns", tip="comma-separated; blank = selected column")
-        sec.add_button("Rename", lambda: self.rename(sec.form))
-        sec.add_button("Set unit / format / description", lambda: self.set_meta(sec.form))
-        sec.add_button("Convert unit", lambda: self.convert(sec.form))
-        sec.add_button("Remove column(s)", lambda: self.remove(sec.form))
+        sec.add_button("Rename", lambda sec=sec: self.rename(sec.form))
+        sec.add_button("Set unit / format / description", lambda sec=sec: self.set_meta(sec.form))
+        sec.add_button("Convert unit", lambda sec=sec: self.convert(sec.form))
+        sec.add_button("Remove column(s)", lambda sec=sec: self.remove(sec.form))
 
         sec = Section(self, "Masks")
         sec.form.add_text("cols", "Columns", tip="comma-separated; blank = selected column")
         sec.form.add_text("expr", "Mask where", tip="boolean expression, e.g. a < 0")
         sec.form.add_text("fill", "Fill value")
-        sec.add_button("Mask rows", lambda: self.mask_rows(sec.form))
-        sec.add_button("Unmask", lambda: self.unmask(sec.form))
-        sec.add_button("Fill masked values", lambda: self.fill(sec.form))
+        sec.add_button("Mask rows", lambda sec=sec: self.mask_rows(sec.form))
+        sec.add_button("Unmask", lambda sec=sec: self.unmask(sec.form))
+        sec.add_button("Fill masked values", lambda sec=sec: self.fill(sec.form))
 
         sec = Section(self, "Rows")
         sec.form.add_text("keys", "Keys", tip="comma-separated column names")
@@ -956,10 +956,10 @@ class TableEditor(TablePanel):
         sec.form.add_text("expr", "Filter where", tip="boolean expression, e.g. (a > 3) & (b < 9)")
         sec.form.add_text("value", "Lookup value", tip="Rows where the selected column equals "
                           "this value (uses an astropy table index, Table.loc)")
-        sec.add_button("Sort", lambda: self.sort(sec.form))
-        sec.add_button("Filter rows", lambda: self.filter(sec.form))
-        sec.add_button("Unique rows", lambda: self.unique(sec.form))
-        sec.add_button("Lookup via index (loc)", lambda: self.lookup(sec.form))
+        sec.add_button("Sort", lambda sec=sec: self.sort(sec.form))
+        sec.add_button("Filter rows", lambda sec=sec: self.filter(sec.form))
+        sec.add_button("Unique rows", lambda sec=sec: self.unique(sec.form))
+        sec.add_button("Lookup via index (loc)", lambda sec=sec: self.lookup(sec.form))
 
         sec = Section(self, "Column types")
         sec.form.add_text("name", "New column", "coord")
@@ -971,8 +971,8 @@ class TableEditor(TablePanel):
                                                   "decimalyear", "fits"])
         sec.form.add_combo("tscale", "Time scale", ["utc", "tai", "tt", "tdb", "ut1"])
         sec.add_button("Table <-> QTable", lambda: self.toggle_qtable())
-        sec.add_button("Make SkyCoord column (RA/Dec)", lambda: self.skycoord(sec.form))
-        sec.add_button("Make Time column from selected", lambda: self.timecol(sec.form))
+        sec.add_button("Make SkyCoord column (RA/Dec)", lambda sec=sec: self.skycoord(sec.form))
+        sec.add_button("Make Time column from selected", lambda sec=sec: self.timecol(sec.form))
 
     # helpers
     def _col(self) -> str:
@@ -1057,9 +1057,9 @@ class TableCombiner(TablePanel):
         sec = Section(self, "Group by")
         sec.form.add_text("keys", "Keys", tip="comma-separated column names")
         sec.form.add_combo("func", "Aggregate", list(AGGREGATORS))
-        sec.add_button("Aggregate groups", lambda: self.aggregate(sec.form),
+        sec.add_button("Aggregate groups", lambda sec=sec: self.aggregate(sec.form),
                        "Non-numeric columns are dropped (reported as warnings)")
-        sec.add_button("Group sizes", lambda: self.sizes(sec.form))
+        sec.add_button("Group sizes", lambda sec=sec: self.sizes(sec.form))
 
         sec = Section(self, "Join (selected table = left)")
         self.right = WorkspaceCombo(ws, Table)
@@ -1067,17 +1067,17 @@ class TableCombiner(TablePanel):
         sec.form.add_text("keys", "Keys", tip="blank = all common column names")
         sec.form.add_combo("how", "Join type", ["inner", "outer", "left", "right", "cartesian"])
         sec.form.add_text("sfx", "Suffixes", "_1,_2", tip="for clashing column names")
-        sec.add_button("Join", lambda: self.join(sec.form))
-        sec.add_button("Set difference (left - right)", lambda: self.setdiff(sec.form))
+        sec.add_button("Join", lambda sec=sec: self.join(sec.form))
+        sec.add_button("Set difference (left - right)", lambda sec=sec: self.setdiff(sec.form))
 
         sec = Section(self, "Stack (select tables below)")
         self.picker = TablePicker(ws)
         sec.form.add_widget("tables", "Tables", self.picker)
         sec.form.add_combo("how", "Join type", ["outer", "inner", "exact"],
                            tip="'exact' requires identical columns / row counts")
-        sec.add_button("vstack (append rows)", lambda: self.stack(sec.form, "vstack"))
-        sec.add_button("hstack (side by side)", lambda: self.stack(sec.form, "hstack"))
-        sec.add_button("dstack (new axis)", lambda: self.stack(sec.form, "dstack"))
+        sec.add_button("vstack (append rows)", lambda sec=sec: self.stack(sec.form, "vstack"))
+        sec.add_button("hstack (side by side)", lambda sec=sec: self.stack(sec.form, "hstack"))
+        sec.add_button("dstack (new axis)", lambda sec=sec: self.stack(sec.form, "dstack"))
 
     def _go(self, fn: Callable[[Table], Table], suffix: str) -> None:
         t = self.table()

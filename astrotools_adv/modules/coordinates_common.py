@@ -769,6 +769,8 @@ def coord_table(sc: SkyCoord, rep: str = "spherical", fmt: str = "decimal", prec
     sc = sc.reshape(-1) if sc.isscalar else sc
     names = list(sc.frame.representation_component_names)
     lon_name, lat_name = names[0], names[1]
+    if (lon_name, lat_name) == ("x", "y"):  # Cartesian-default frames (Galactocentric, ITRS)
+        lon_name, lat_name = "lon", "lat"
     out = QTable()
     if rep in ("spherical", "unitspherical"):
         sph = sc.spherical

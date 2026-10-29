@@ -88,7 +88,7 @@ def build_kernel(name: str, params: str, x_size: int = 0, y_size: int = 0, mode:
                 kernel = cls(**values, **kwargs)
     except ParseError:
         raise
-    except (TypeError, ValueError, KernelError) as exc:
+    except (TypeError, ValueError, ZeroDivisionError, KernelError) as exc:
         raise ParseError(f"Cannot build {name}: {exc}") from exc
     if np.asarray(kernel.array).size == 0 or not np.all(np.isfinite(kernel.array)):
         raise ParseError("These parameters produce an empty or non-finite kernel.")

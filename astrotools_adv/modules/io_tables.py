@@ -411,15 +411,15 @@ class VotablePanel(ModulePanel):
         sec.form.add_widget("path", "File", self.open_path)
         sec.form.add_combo("verify", "Verify", ["warn", "ignore", "exception"],
                            tip="How strictly the VOTable spec is enforced while parsing")
-        sec.add_button("Open", lambda: self.open_file(sec.form))
+        sec.add_button("Open", lambda sec=sec: self.open_file(sec.form))
         sec.add_button("Validate against the spec", self.validate)
         self.open_sec = sec
 
         sec = Section(self, "Table")
         sec.form.add_int("index", "Table #", 0, 0, 10**6)
         sec.form.add_text("name", "Store as", "votable_table")
-        sec.add_button("Show fields / params", lambda: self.show_fields(sec.form))
-        sec.add_button("Table -> workspace", lambda: self.to_workspace(sec.form))
+        sec.add_button("Show fields / params", lambda sec=sec: self.show_fields(sec.form))
+        sec.add_button("Table -> workspace", lambda sec=sec: self.to_workspace(sec.form))
         self.table_sec = sec
 
         sec = Section(self, "Write workspace table")
@@ -429,7 +429,7 @@ class VotablePanel(ModulePanel):
         sec.form.add_widget("path", "File", self.write_path)
         sec.form.add_combo("fmt", "Serialization", VOTABLE_FORMATS)
         sec.form.add_check("overwrite", "Overwrite", False)
-        sec.add_button("Write VOTable", lambda: self.write(sec.form))
+        sec.add_button("Write VOTable", lambda sec=sec: self.write(sec.form))
         self.write_sec = sec
 
     def open_file(self, f: Any) -> None:
@@ -513,8 +513,8 @@ class MiscPanel(ModulePanel):
         sec.form.add_check("overwrite", "Overwrite", False)
         sec.form.add_check("append", "Append (HDF5)", False)
         sec.form.add_text("name", "Store as", "misc_table")
-        sec.add_button("Write", lambda: self.write_table(sec.form))
-        sec.add_button("Read", lambda: self.read_table(sec.form))
+        sec.add_button("Write", lambda sec=sec: self.write_table(sec.form))
+        sec.add_button("Read", lambda sec=sec: self.read_table(sec.form))
         self.table_sec = sec
 
         sec = Section(self, "YAML / ASDF objects")
@@ -526,12 +526,12 @@ class MiscPanel(ModulePanel):
         sec.form.add_widget("path", "File", self.yaml_path)
         sec.form.add_check("overwrite", "Overwrite", False)
         sec.form.add_text("name", "Store as", "yaml_object")
-        sec.add_button("Object -> YAML text", lambda: self.dump_yaml(sec.form))
-        sec.add_button("YAML text -> workspace", lambda: self.load_yaml(sec.form))
-        sec.add_button("Save YAML text to file", lambda: self.save_yaml(sec.form))
-        sec.add_button("Load YAML file -> workspace", lambda: self.load_yaml_file(sec.form))
-        sec.add_button("Object -> ASDF file", lambda: self.write_asdf(sec.form))
-        sec.add_button("ASDF file -> workspace", lambda: self.read_asdf(sec.form))
+        sec.add_button("Object -> YAML text", lambda sec=sec: self.dump_yaml(sec.form))
+        sec.add_button("YAML text -> workspace", lambda sec=sec: self.load_yaml(sec.form))
+        sec.add_button("Save YAML text to file", lambda sec=sec: self.save_yaml(sec.form))
+        sec.add_button("Load YAML file -> workspace", lambda sec=sec: self.load_yaml_file(sec.form))
+        sec.add_button("Object -> ASDF file", lambda sec=sec: self.write_asdf(sec.form))
+        sec.add_button("ASDF file -> workspace", lambda sec=sec: self.read_asdf(sec.form))
         self.obj_sec = sec
 
     # ---- tables ---------------------------------------------------------------- #
