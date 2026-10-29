@@ -74,7 +74,8 @@ class MainWindow(QMainWindow):
         self.statusBar().addWidget(self.status_label, 1)
         self._build_menu()
         for name, err in failures or []:
-            self.log.append_text(f"[module load failed] {name}: {err}")
+            label = "warning" if name == "environment" else "module load failed"
+            self.log.append_text(f"[{label}] {name}: {err}")
         if failures:
             self.statusBar().showMessage(f"{len(failures)} module(s) failed to load - see log.", 8000)
 
@@ -138,12 +139,31 @@ class MainWindow(QMainWindow):
         return self.stack.currentWidget()
 
 
+MIN_ASTROPY = (6, 0)
+
+
+def environment_warnings() -> List[Tuple[str, str]]:
+    """Non-fatal problems with the installed dependencies."""
+    import astropy
+
+    notes: List[Tuple[str, str]] = []
+    try:
+        major, minor = (int(x) for x in astropy.__version__.split(".")[:2])
+    except ValueError:
+        return notes
+    if (major, minor) < MIN_ASTROPY:
+        notes.append(("environment",
+                      f"astropy {astropy.__version__} is older than the tested minimum "
+                      f"{'.'.join(map(str, MIN_ASTROPY))}; some tools may not work."))
+    return notes
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     logging.basicConfig(level=logging.WARNING)
     app = QApplication(list(argv if argv is not None else sys.argv))
     app.setApplicationName(APP_NAME)
     specs, failures = registry.discover()
-    win = MainWindow(specs, failures)
+    win = MainWindow(specs, failures + environment_warnings())
     win.show()
     return app.exec_()
 
