@@ -40,6 +40,7 @@ IERS_STATUS = {iers.FROM_IERS_B: "IERS-B (final)", iers.FROM_IERS_A: "IERS-A (ob
                iers.TIME_BEFORE_IERS_RANGE: "before the table (extrapolated)",
                iers.TIME_BEYOND_IERS_RANGE: "beyond the table (extrapolated)"}
 
+GEOCENTER = EarthLocation.from_geocentric(0 * u.m, 0 * u.m, 0 * u.m)
 _LOCK = threading.RLock()  # astropy's config / warnings state is process-global
 
 
@@ -218,7 +219,8 @@ def convert_times(v: Dict[str, Any]) -> Dict[str, Any]:
     fmt = v["out_format"]
     t_in = t.copy()
     t_in.precision = int(v["precision"])
-    where = f", location lon={t.location.lon:.5f} lat={t.location.lat:.5f}" if t.location else ""
+    where = f", location lon={t.location.lon:.5f} lat={t.location.lat:.5f}" \
+        if t.location is not None else ""
     lines = [f"Input:  {t.size} time(s), format={t.format}, scale={t.scale}{where}",
              f"Output: scale={t_out.scale}, format={fmt}, precision={t_out.precision}",
              "", f"{fmt}:", _listing(t_out, fmt)]
@@ -293,7 +295,8 @@ def sidereal_and_light_time(v: Dict[str, Any]) -> Dict[str, Any]:
                      + ("the given longitude" if lon is None else "Greenwich (no location given)"))
     if v["do_ltt"]:
         sky = parse_skycoord(v["sky"], name="source position")
-        ltt = t.light_travel_time(sky, kind=v["ltt_kind"], location=t.location,
+        observer = t.location if t.location is not None else GEOCENTER
+        ltt = t.light_travel_time(sky, kind=v["ltt_kind"], location=observer,
                                   ephemeris=v["ephemeris"] or None)
         corrected = t.tdb + ltt
         corrected.precision = 6

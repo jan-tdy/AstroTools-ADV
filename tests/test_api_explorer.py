@@ -255,3 +255,22 @@ def test_code_is_valid_python_for_all_kinds(panel, ws):
     code = panel.python_code()
     compile(code, "<generated>", "exec")
     assert "import astropy.units as u" in code
+
+
+def test_call_in_worker_thread(qtbot, ws):
+    """Real thread pool (no synchronous shortcut): result arrives on the GUI thread."""
+    from astrotools_adv.core import tasks
+
+    tasks.set_synchronous(False)
+    p = ax.ApiExplorer(ws)
+    qtbot.addWidget(p)
+    qtbot.waitUntil(lambda: bool(p.entries), timeout=20000)
+    ws.put("d", np.array([1.0, 2.0, 3.0, 1000.0]))
+    p.select_qualname("astropy.stats.sigma_clip")
+    p.call_form.edits["data"].setText("ws_d")
+    p.call_form.edits["sigma"].setText("1")
+    p.gui_thread.setChecked(False)
+    p.on_run()
+    qtbot.waitUntil(lambda: p._has_result, timeout=20000)
+    assert list(p._last_value.mask) == [False, False, False, True]
+    tasks.wait_all()

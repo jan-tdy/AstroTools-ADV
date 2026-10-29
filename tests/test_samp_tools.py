@@ -161,7 +161,6 @@ def test_panel_end_to_end(qtbot, ws, lockfile, monkeypatch):
     assert Table.read(st.file_url_to_path(got[1][1]["url"]), format="votable")["x"].tolist() == [1.0, 2.0]
 
     # incoming table.load.votable is loaded into the workspace
-    other.connect  # (receiver side) - send from other to the GUI client
     other_msg = other.table_message(Table({"y": [5, 6, 7]}), "from_other")
     my_id = panel.session.client.get_public_id()
     other.send("table.load.votable", other_msg, target=my_id)

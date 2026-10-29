@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import SkyCoord, concatenate
-from astropy.table import Table
+from astropy.table import MaskedColumn, Table
 from astropy.time import Time
 from PyQt5.QtWidgets import QAbstractItemView, QListWidget, QWidget
 
@@ -25,13 +25,11 @@ MATCH_OPS = ("match_to_catalog_sky (nearest on sky)", "match_to_catalog_3d (near
 
 def _prefixed(table: Table, prefix: str, idx: np.ndarray, mask: Optional[np.ndarray] = None
               ) -> Dict[str, object]:
-    """Columns of ``table`` at ``idx`` (optionally masked where ``mask`` is False)."""
+    """Columns of ``table`` at ``idx`` (masked where ``mask`` is False)."""
     out: Dict[str, object] = {}
     for name in table.colnames:
         col = table[name][idx]
-        if mask is not None and not mask.all():
-            col = table.MaskedColumn(col) if hasattr(table, "MaskedColumn") else col
-            from astropy.table import MaskedColumn
+        if mask is not None and not mask.all() and not isinstance(col, u.Quantity):
             col = MaskedColumn(col, mask=~mask)
         out[f"{prefix}{name}"] = col
     return out
@@ -197,8 +195,8 @@ class SpaceMotionPanel(ModulePanel):
         t["lon_before_deg"], t["lat_before_deg"] = b.spherical.lon.deg, b.spherical.lat.deg
         t["lon_after_deg"], t["lat_after_deg"] = a.spherical.lon.deg, a.spherical.lat.deg
         t["shift_arcsec"] = b.separation(a).arcsec
-        t["epoch_after"] = time_strings(a.obstime if a.obstime.shape else
-                                        Time([a.obstime] * len(a)))
+        eps = time_strings(a.obstime)
+        t["epoch_after"] = np.repeat(eps, len(a)) if len(eps) == 1 else eps
         self.table_view.set_table(t)
         self.ws.put(self.form.value("name"), after)
 

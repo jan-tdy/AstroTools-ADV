@@ -605,15 +605,20 @@ class ConfigPanel(ModulePanel):
         self.guard(go)
 
     def show_default_file(self) -> None:
-        def go() -> None:
+        pkg = self.form.value("pkg") or "astropy"
+
+        def work() -> str:
             from astropy import config
 
-            pkg = self.form.value("pkg") or "astropy"
-            _v, text, _w = _capture(lambda: config.generate_config(pkg))
-            self.paths.show_text(text or "(no configuration items)")
+            buf = io.StringIO()  # a file-like target keeps the user's config file untouched
+            _v, _out, _w = _capture(lambda: config.generate_config(pkg, buf))
+            return buf.getvalue() or "(no configuration items)"
+
+        def done(text: str) -> None:
+            self.paths.show_text(text)
             self.tabs.setCurrentWidget(self.paths)
 
-        self.guard(go)
+        self.run(work, done, busy_text="Generating default configuration ...")
 
 
 # --------------------------------------------------------------------------- #

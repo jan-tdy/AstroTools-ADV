@@ -206,7 +206,7 @@ def test_tool_pages(qtbot, ws):
     qtbot.addWidget(panel)
     pg = panel.pages["Masked"]
     pg.run()
-    assert "1.6666" in pg.output.toPlainText()  # mean ignores masked entries
+    assert "2.5 m" in pg.output.toPlainText()  # mean of 0, 2, 3, 5: masked entries ignored
     pg.form.set_value("mask", "garbage(")
     pg.run()
     assert pg.output.toPlainText().startswith("Error:")

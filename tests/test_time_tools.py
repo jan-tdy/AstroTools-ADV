@@ -130,7 +130,7 @@ def test_converter_errors(qtbot, ws, dialogs):
     p = panel(qtbot, ws, "time_converter")
     for values, fmt, scale in [("", "auto", "auto"), ("not a time", "auto", "auto"),
                                ("abc", "jd", "utc"), ("2000-13-45", "auto", "auto"),
-                               ("2000-01-01", "iso", "bogus")]:
+                               ("2000-01-01", "mjd", "utc")]:
         dialogs.clear()
         fill(p, values=values, fmt=fmt, scale=scale)
         p.convert()
@@ -171,7 +171,8 @@ def test_far_future_ut1_degrades_gracefully(qtbot, ws, dialogs):
     fill(p, values="2400-01-01 00:00:00", scale="utc", out_scale="ut1")
     p.convert()
     assert not dialogs  # extrapolated or reported, never a crash
-    assert "2400-01-01" in p.out.toPlainText()
+    assert "2399-12-31 23:59:59" in p.out.toPlainText()  # UT1 slightly before UTC
+    assert "Notes:" in p.out.toPlainText()  # ERFA 'dubious year' is surfaced
 
 
 # ---- arithmetic ---------------------------------------------------------------- #
