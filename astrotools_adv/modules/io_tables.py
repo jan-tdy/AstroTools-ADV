@@ -132,7 +132,16 @@ def ascii_read(path: str, fmt: str = "auto", guess: bool = True, delimiter: str 
         kw["quotechar"] = quotechar.strip()
     if fill_values.strip():
         kw["fill_values"] = parse_fill_values(fill_values)
-    return aascii.read(path, **kw)
+    try:
+        return aascii.read(path, **kw)
+    except aascii.InconsistentTableError as exc:
+        if "Unable to guess table format" not in str(exc):
+            raise
+        # astropy lists every reader it tried (thousands of characters): summarise instead
+        raise ParseError(
+            "Could not guess the table format. Choose a Format, set Delimiter, Header line, "
+            "First data line or Comment regex, or untick 'Guess' and read again to see the "
+            "error of a single reader.") from None
 
 
 def ascii_write(table: Table, fmt: str = "ecsv", path: str = "", overwrite: bool = False,

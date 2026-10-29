@@ -106,12 +106,13 @@ def build_wcs_from_frame(frame_name: str, proj: str = "TAN", **geometry: Any) ->
         raise ParseError(f"Unknown projection {proj!r}.")
     cls = frame_transform_graph.lookup_name(frame_name.strip().lower())
     if cls is None:
-        raise ParseError(f"Unknown frame {frame_name!r} (try icrs, fk5, fk4, galactic, "
-                         "geocentricmeanecliptic).")
+        raise ParseError(f"Unknown frame {frame_name!r} (supported: icrs, fk5, fk4, fk4noeterms, "
+                         "galactic, itrs).")
     try:
         w = celestial_frame_to_wcs(cls(), projection=proj)
     except Exception as exc:  # noqa: BLE001
-        raise ParseError(f"No WCS representation for frame {frame_name!r}: {exc}") from exc
+        raise ParseError(f"No WCS representation for frame {frame_name!r} (supported: icrs, fk5, fk4, "
+                         f"fk4noeterms, galactic, itrs): {exc}") from exc
     return _apply_geometry(w, geometry.get("crval", (0.0, 0.0)), geometry.get("crpix", (1.0, 1.0)),
                            geometry.get("scale_arcsec", 1.0), geometry.get("rotation_deg", 0.0),
                            geometry.get("east_left", True), geometry.get("shape"),

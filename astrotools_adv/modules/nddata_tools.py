@@ -284,7 +284,7 @@ class CutoutPanel(_Base):
             f"shape                 : {cut.shape}\n"
             f"center (original px)  : {cut.center_original}\n"
             f"center (cutout px)    : {cut.center_cutout}\n"
-            f"input pos in cutout   : {cut.input_position_cutout}\n"
+            f"input pos in cutout   : {tuple(float(x) for x in cut.input_position_cutout)}\n"
             f"bbox original (y,x)   : {cut.bbox_original}\n"
             f"origin original (x,y) : {cut.origin_original}\n"
             f"slices original       : {cut.slices_original}\n"

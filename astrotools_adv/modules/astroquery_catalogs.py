@@ -733,10 +733,13 @@ def _xmatch(p: Dict[str, Any], t: float) -> Any:
 
 def _xm_fields(n: int, default: str) -> Tuple[Field, ...]:
     return (Field(f"cat{n}", f"Catalog {n} (CDS id)", "text", default,
-                  "e.g. 'vizier:II/246/out' or 'simbad'; empty = use workspace table below."),
+                  "e.g. 'vizier:II/246/out' or 'simbad'. When filled in it is used instead of the "
+                  "workspace table below."),
             Field(f"tab{n}", f"...or workspace table {n}", "table", ""),
-            Field(f"ra{n}", f"RA column {n}", "text", "", "Needed for CDS catalogs; guessed for tables."),
-            Field(f"dec{n}", f"Dec column {n}", "text", ""))
+            Field(f"ra{n}", f"RA column {n}", "text", "", "Only for workspace tables; left empty it is "
+                  "detected (ra, RAJ2000, ...). Not needed for CDS catalogs."),
+            Field(f"dec{n}", f"Dec column {n}", "text", "", "Only for workspace tables; left empty it is "
+                  "detected (dec, DEJ2000, ...). Not needed for CDS catalogs."))
 
 
 XMATCH_QUERIES = (
