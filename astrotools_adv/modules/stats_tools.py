@@ -808,9 +808,11 @@ def compute_blocks(t: np.ndarray, x: Optional[np.ndarray], sigma: Any, fitness: 
         kw["ncp_prior"] = ncp_prior
     else:
         kw["p0"] = p0
-    edges = ast_stats.bayesian_blocks(t, x=x if fitness != "events" else None,
-                                      sigma=sigma if fitness == "measures" else None,
-                                      fitness=fitness, **kw)
+    try:
+        edges = ast_stats.bayesian_blocks(t, x=x, sigma=sigma if fitness == "measures" else None,
+                                          fitness=fitness, **kw)
+    except ValueError as exc:  # e.g. non-integer counts for 'events', non-0/1 for 'regular_events'
+        raise ParseError(str(exc)) from None
     return {"t": t, "x": x, "edges": edges, "fitness": fitness}
 
 
@@ -824,6 +826,8 @@ class BayesianBlocksPanel(ModulePanel):
         f = self.form
         f.add_combo("fitness", "Fitness", ["events", "regular_events", "measures"])
         f.add_widget("x", "x (counts/measurements)", self.x_in)
+        self.x_in.setToolTip("events: optional integer counts per time stamp; regular_events: 0/1 flags; "
+                             "measures: measured values")
         f.add_widget("s", "sigma (measures only)", self.s_in)
         f.add_text("dt", "dt", "", "Time spacing (regular_events only)", "optional")
         f.add_float("p0", "p0 (false alarm)", 0.05, 1e-9, 0.999, 4)
@@ -851,9 +855,11 @@ class BayesianBlocksPanel(ModulePanel):
         ax = self.canvas.axes()
         t, x = r["t"], r["x"]
         if r["fitness"] == "events":
-            ax.hist(t, bins=min(100, max(10, t.size // 5)), color="0.8", density=True)
-            counts, _ = np.histogram(t, e)
-            ax.stairs(counts / np.diff(e) / t.size, e, color="r", lw=2, label="blocks")
+            w = x if x is not None else np.ones_like(t)  # x = counts per time stamp, if given
+            ax.hist(t, bins=min(100, max(10, t.size // 5)), weights=w / w.sum(), color="0.8",
+                    density=True)
+            counts, _ = np.histogram(t, e, weights=w)
+            ax.stairs(counts / np.diff(e) / w.sum(), e, color="r", lw=2, label="blocks")
             ax.legend()
         else:
             ax.plot(t, x, ".", color="0.5")
@@ -872,6 +878,12 @@ class BayesianBlocksPanel(ModulePanel):
 ANGLE_UNITS = {"degrees": u.deg, "radians": u.rad, "hours (hourangle)": u.hourangle}
 
 
+def _wrap_angle(value: float, period: float) -> float:
+    """``value`` modulo ``period`` in [0, period); rounding noise just below ``period`` becomes 0."""
+    wrapped = float(value) % period
+    return 0.0 if np.isclose(wrapped, period, rtol=0, atol=period * 1e-12) else wrapped
+
+
 def compute_circular(alpha: np.ndarray, unit: Any, weights: Optional[np.ndarray], mu: float,
                      p: float, beta: Optional[np.ndarray]) -> Dict[str, Any]:
     a = np.asarray(alpha, float)
@@ -888,8 +900,8 @@ def compute_circular(alpha: np.ndarray, unit: Any, weights: Optional[np.ndarray]
     mp, rp = ast_stats.circmoment(rad, p=p, weights=weights)
     res: Dict[str, Any] = {
         "rad": rad, "weights": weights, "unit": unit,
-        "circmean": (cmean * u.rad).to_value(unit) % (360 if unit == u.deg else 2 * np.pi
-                                                      if unit == u.rad else 24),
+        "circmean": _wrap_angle((cmean * u.rad).to_value(unit),
+                                360 if unit == u.deg else 2 * np.pi if unit == u.rad else 24),
         "circmean_rad": cmean,
         "circvar": float(ast_stats.circvar(rad, weights=weights)),
         "circstd_angular": (float(ast_stats.circstd(rad, weights=weights, method="angular")) * u.rad

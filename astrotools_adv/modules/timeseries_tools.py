@@ -449,7 +449,9 @@ class CreatePanel(ModulePanel):
         f.add_text("start", "Start time", "2020-01-01T00:00:00", "ISO string, JD via format "
                    "'jd' not needed here (regular/binned modes).")
         f.add_text("delta", "Time delta / bin size", "0.5 day", "Quantity, e.g. '30 s', '0.5 day'.")
-        f.add_text("end", "Bin end (binned)", "", "Optional, alternative to bin size.")
+        f.add_text("end", "Bin end (binned)", "", "Optional end of the last bin. With n bins > 0 "
+                   "the bin size becomes (end - start) / n; with n = 0 the bin size field "
+                   "is used and enough bins are created to reach the end.")
         f.add_int("n", "n samples / bins", 100, 0, 10_000_000,
                   "Regular: samples. Binned: bins (0 = derive from bin end).")
         f.add_multiline("data", "Data columns", "flux = 1 + 0*t",
@@ -486,13 +488,26 @@ class CreatePanel(ModulePanel):
                             time_delta=parse_quantity(v["delta"], u.day, "time delta"),
                             n_samples=n)
         elif mode == 2:
-            kw: Dict[str, Any] = {"time_bin_start": parse_time(v["start"], name="start time")}
+            start = parse_time(v["start"], name="start time")
+            kw: Dict[str, Any] = {"time_bin_start": start}
+            n_bins = int(v["n"])
             if v["end"]:
-                kw["time_bin_end"] = parse_time(v["end"], name="bin end")
+                span = (parse_time(v["end"], name="bin end") - start).to(u.day)
+                if span.value <= 0:
+                    raise ParseError("Bin end must be later than the start time.")
+                if n_bins > 0:
+                    kw["time_bin_size"] = span / n_bins
+                else:
+                    size = parse_quantity(v["delta"], u.day, "bin size")
+                    if size.value <= 0:
+                        raise ParseError("Bin size must be positive.")
+                    n_bins = int(np.ceil((span / size).decompose().value))
+                    kw["time_bin_size"] = size
             else:
                 kw["time_bin_size"] = parse_quantity(v["delta"], u.day, "bin size")
-            if int(v["n"]) > 0:
-                kw["n_bins"] = int(v["n"])
+                if n_bins < 1:
+                    raise ParseError("Enter the number of bins, or a bin end.")
+            kw["n_bins"] = n_bins
             ts = BinnedTimeSeries(**kw)
         else:
             if not v["path"]:
