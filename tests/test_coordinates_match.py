@@ -64,6 +64,28 @@ def test_search_around_sky(qtbot, ws, tables):
     assert r["b_mag"][0] == 1.0 and r["a_name"][1] == "y"
 
 
+def test_search_around_sky_index_order_with_unequal_catalogs(qtbot, ws):
+    """idx_a must index catalog A and idx_b catalog B (astropy returns them reversed)."""
+    ws.put("A", Table({"ra": [10.0, 10.001, 10.5, 11.0], "dec": [41.0, 41.0002, 41.0, 41.5],
+                       "id": ["s1", "s2", "s3", "s4"]}))
+    ws.put("B", Table({"ra": [10.00001, 10.5003, 20.0], "dec": [41.00001, 41.0001, 0.0],
+                       "nm": ["A", "B", "C"]}))
+    p = match_panel_ab(qtbot, ws)
+    p.form.set_value("op", cm.MATCH_OPS[2])
+    p.form.set_value("limit", "10 arcsec")
+    p.match()
+    r = p.result
+    assert sorted(zip(r["idx_a"], r["idx_b"])) == [(0, 0), (1, 0), (2, 1)]
+    assert sorted(zip(r["a_id"], r["b_nm"])) == [("s1", "A"), ("s2", "A"), ("s3", "B")]
+
+
+def match_panel_ab(qtbot, ws):
+    p = make(qtbot, ws, cm.MatchPanel)
+    p.a.tbl_combo.setCurrentText("A")
+    p.b.tbl_combo.setCurrentText("B")
+    return p
+
+
 def test_search_requires_limit(qtbot, ws, tables, errors):
     p = match_panel(qtbot, ws)
     p.form.set_value("op", cm.MATCH_OPS[2])

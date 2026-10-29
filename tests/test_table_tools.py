@@ -1,3 +1,5 @@
+import importlib.util
+
 import pytest
 from astropy import units as u
 from astropy.coordinates import SkyCoord
@@ -241,10 +243,14 @@ def test_manager_open_save_paste(qtbot, ws, tmp_path, errors):
     assert errors
     # pandas
     pd_sec = [s for s in p.findChildren(type(sec)) if s.title() == "pandas"][0]
-    p.to_pandas(pd_sec.form)
-    pd_sec.form.set_value("name", "dataframe")
-    p.from_pandas(pd_sec.form)
-    assert isinstance(ws.get("dataframe_table"), Table)
+    if importlib.util.find_spec("pandas") is None:  # optional dependency
+        with pytest.raises(ParseError, match="pandas is not installed"):
+            p.to_pandas(pd_sec.form)
+    else:
+        p.to_pandas(pd_sec.form)
+        pd_sec.form.set_value("name", "dataframe")
+        p.from_pandas(pd_sec.form)
+        assert isinstance(ws.get("dataframe_table"), Table)
 
 
 def test_editor_panel_flow(qtbot, ws, errors):

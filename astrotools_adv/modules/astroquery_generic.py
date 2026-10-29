@@ -761,6 +761,8 @@ class GenericBrowser(QueryPanel):
     def _clear_params(self) -> None:
         if self._param_form is not None:
             self.params_layout.removeWidget(self._param_form)
+            self._param_form.hide()           # deleteLater() is deferred; do not draw over the new form
+            self._param_form.setParent(None)
             self._param_form.deleteLater()
             self._param_form = None
         self._params = []

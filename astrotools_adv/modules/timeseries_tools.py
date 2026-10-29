@@ -142,7 +142,7 @@ def make_synthetic(kind: str, n: int, duration: float, start: str = "2020-01-01T
         in_transit = np.abs(fold_phase(t, period, t_transit)) < transit_duration / 2
         flux[in_transit] -= depth
     flux += rng.normal(0.0, noise, n) if noise > 0 else 0.0
-    time = Time(start) + t * u.day
+    time = parse_time(start, name="start time") + t * u.day
     return TimeSeries(time=time, data={
         "flux": flux, "flux_err": np.full(n, noise if noise > 0 else 1e-6)})
 

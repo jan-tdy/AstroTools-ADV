@@ -337,3 +337,15 @@ def test_every_service_loads_or_reports(browser):
 
 def test_specs_category():
     assert [s.category for s in g.SPECS] == ["Online"]
+
+
+def test_switching_methods_hides_the_replaced_parameter_form(qtbot, ws):
+    """The old form is only scheduled for deletion; it must not stay visible under the new one."""
+    panel = g.GenericBrowser(ws)
+    qtbot.addWidget(panel)
+    panel.show()
+    panel.service_combo.setCurrentIndex(panel.service_combo.findText("simbad"))
+    old = panel._param_form
+    panel.method_combo.setCurrentIndex(panel.method_combo.findData("query_region"))
+    assert panel._param_form is not old
+    assert old.isHidden() and old.parent() is None

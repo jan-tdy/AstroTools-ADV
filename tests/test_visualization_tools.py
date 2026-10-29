@@ -221,5 +221,14 @@ def test_quantity_time_panel(qtbot, ws, shown):
     assert len(shown) == 2
 
 
+def test_every_offered_time_format_plots(qtbot, ws, shown):
+    p = panel(qtbot, ws, "viz_units")
+    combo = p.form.fields["tformat"]
+    for i in range(combo.count()):
+        p.form.set_value("tformat", combo.itemText(i))
+        p.go()
+    assert not shown
+
+
 def test_specs_category():
     assert {s.category for s in vt.SPECS} == {"Images"}

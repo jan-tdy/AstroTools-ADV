@@ -75,19 +75,20 @@ def cross_match(op: str, a: SkyCoord, b: SkyCoord, table_a: Optional[Table],
         else:
             if limit is None:
                 raise ParseError("A search radius / distance limit is required.")
+            # astropy returns (indices into the *argument*, indices into self, ...)
             if three_d:
-                i1, i2, sep2d, d3d = a.search_around_3d(b, limit)
+                i_b, i_a, sep2d, d3d = a.search_around_3d(b, limit)
             else:
-                i1, i2, sep2d, d3d = a.search_around_sky(b, limit)
-            res["idx_a"], res["idx_b"] = np.asarray(i1), np.asarray(i2)
+                i_b, i_a, sep2d, d3d = a.search_around_sky(b, limit)
+            res["idx_a"], res["idx_b"] = np.asarray(i_a), np.asarray(i_b)
             res["sep_arcsec"] = sep2d.arcsec
             if three_d:
                 res["sep3d_pc"] = d3d.to(u.pc)
             if table_a is not None:
-                for k, v in _prefixed(table_a, "a_", np.asarray(i1)).items():
+                for k, v in _prefixed(table_a, "a_", np.asarray(i_a)).items():
                     res[k] = v
             if table_b is not None:
-                for k, v in _prefixed(table_b, "b_", np.asarray(i2)).items():
+                for k, v in _prefixed(table_b, "b_", np.asarray(i_b)).items():
                     res[k] = v
     return res
 

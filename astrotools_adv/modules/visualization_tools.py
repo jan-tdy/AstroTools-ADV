@@ -422,8 +422,8 @@ class QuantityTimePanel(ModulePanel):
                    "Quantity or Time expression (u, np, Time, linspace... available)")
         f.add_text("y", "y", "(x - x[0]).to(u.hr) ** 0.5 * 10 * u.m / u.hr ** 0.5",
                    "expression; the name x refers to the x values")
-        f.add_combo("tformat", "Time format", ["default", "iso", "isot", "jd", "mjd", "decimalyear",
-                                               "datetime"], "time_support(format=...)")
+        f.add_combo("tformat", "Time format", ["default", "iso", "isot", "jd", "mjd", "decimalyear"],
+                    "time_support(format=...) for Time values on the x axis")
         f.add_combo("style", "Style", ["line", "markers", "line+markers"])
         self.plot = self.add_plot("Plot")
         self.out = self.add_output("Info")
