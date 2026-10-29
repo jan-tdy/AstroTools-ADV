@@ -294,7 +294,7 @@ def test_light_travel_time(qtbot, ws, dialogs):
 
 # ---- IERS ------------------------------------------------------------------------ #
 def test_leap_seconds_table(qtbot, ws, dialogs):
-    p = panel(qtbot, ws, "iers")
+    p = panel(qtbot, ws, "time_leap_iers")
     p.leap_seconds()
     t = p.table.model._table
     assert isinstance(t, Table) and t["year"][0] == 1960
@@ -303,7 +303,7 @@ def test_leap_seconds_table(qtbot, ws, dialogs):
 
 
 def test_earth_orientation_at_date(qtbot, ws, dialogs):
-    p = panel(qtbot, ws, "iers")
+    p = panel(qtbot, ws, "time_leap_iers")
     p.form.set_value("date", "2020-01-01 00:00:00")
     p.orientation()
     text = p.out.toPlainText()
@@ -319,7 +319,7 @@ def test_earth_orientation_at_date(qtbot, ws, dialogs):
 
 
 def test_iers_range(qtbot, ws, dialogs):
-    p = panel(qtbot, ws, "iers")
+    p = panel(qtbot, ws, "time_leap_iers")
     p.table_range()
     text = p.out.toPlainText()
     assert "MJD range: 41684" in text and "Auto-download: False" in text and not dialogs

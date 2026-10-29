@@ -171,3 +171,11 @@ def test_every_module_opens(qtbot, monkeypatch):
     for spec in specs:
         page = win.open_module(spec.key)
         assert page is not None, spec.key
+
+
+def test_safe_eval_comparisons_are_elementwise():
+    x = np.array([1, 3, 5])
+    assert list(p.safe_eval("x > 2", {"x": x})) == [False, True, True]
+    assert list(p.safe_eval("0 < x < 4", {"x": x})) == [True, True, False]
+    assert p.safe_eval("1 < 2 < 3") is True
+    assert p.safe_eval("3 < 2") is False

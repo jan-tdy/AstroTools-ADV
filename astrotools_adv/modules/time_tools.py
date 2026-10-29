@@ -497,6 +497,6 @@ SPECS = [
           "Differences, offsets and ranges with TimeDelta"),
     _spec("sidereal_light_time", "Sidereal & light time", SiderealPanel,
           "Sidereal time and barycentric / heliocentric corrections"),
-    _spec("iers", "Leap seconds & IERS", IersPanel,
+    _spec("time_leap_iers", "Leap seconds & IERS", IersPanel,
           "TAI-UTC, UT1-UTC, polar motion and leap-second table"),
 ]

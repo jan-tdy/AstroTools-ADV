@@ -137,15 +137,15 @@ def _eval(node: ast.AST, ns: Dict[str, Any]) -> Any:  # noqa: C901 - flat dispat
         left = _eval(node.left, ns)
         cmp_ops = {ast.Lt: operator.lt, ast.LtE: operator.le, ast.Gt: operator.gt,
                    ast.GtE: operator.ge, ast.Eq: operator.eq, ast.NotEq: operator.ne}
+        result: Any = True
         for op, comp in zip(node.ops, node.comparators):
             fn = cmp_ops.get(type(op))
             if fn is None:
                 raise ParseError("Unsupported comparison.")
             right = _eval(comp, ns)
-            if not fn(left, right):
-                return False
+            result = np.logical_and(result, fn(left, right))  # element-wise for arrays
             left = right
-        return True
+        return bool(result) if np.ndim(result) == 0 else result
     raise ParseError(f"Unsupported syntax: {type(node).__name__}.")
 
 
