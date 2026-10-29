@@ -415,3 +415,30 @@ def test_plot_cube_wcs_with_slices(qtbot, ws, shown):
 def test_specs_unique_keys():
     assert len({s.key for s in wt.SPECS}) == len(wt.SPECS)
     assert {s.category for s in wt.SPECS} == {"Images"}
+
+
+def test_header_text_accepts_free_spacing_without_warnings():
+    import warnings
+
+    text = ("NAXIS = 2\nNAXIS1 = 200\nNAXIS2 = 100\nCTYPE1 = 'RA---TAN'\nCTYPE2 = 'DEC--TAN'\n"
+            "CRVAL1 = 83.8221\nCRVAL2 = -5.3911\nCRPIX1 = 100.5\nCRPIX2 = 50.5\n"
+            "CDELT1 = -0.0005\nCDELT2 = 0.0005\nCUNIT1 = 'deg'\nCUNIT2 = 'deg'\n")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        w = wt.wcs_from_header_text(text)
+    assert list(w.wcs.ctype) == ["RA---TAN", "DEC--TAN"]
+    assert w.wcs.crval[0] == pytest.approx(83.8221)
+    assert w.pixel_shape == (200, 100)
+
+
+def test_header_text_rejects_non_cards():
+    with pytest.raises(parsing.ParseError, match="not a FITS card"):
+        wt.wcs_from_header_text("this is not a header")
+
+
+def test_builder_notes_missing_wcs_keywords(qtbot, ws, shown):
+    p = panel(qtbot, ws, "wcs_builder")
+    p.form.set_value("source", "header text")
+    p.form.set_value("header", "NAXIS = 2")
+    p.build()
+    assert not shown and "no WCS keywords" in p.out.toPlainText()

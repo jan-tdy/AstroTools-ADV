@@ -103,7 +103,13 @@ def parse_model(expr: str, ws: Optional[Workspace] = None) -> Model:
         text = ast.unparse(ast.fix_missing_locations(tree))
     except SyntaxError as exc:
         raise ParseError(f"Syntax error in model expression: {exc.msg}") from None
-    value = safe_eval(text, model_namespace(ws))
+    try:
+        value = safe_eval(text, model_namespace(ws))
+    except ParseError as exc:
+        if "has no len()" in str(exc):  # astropy's message when a model meets a plain number
+            raise ParseError("Models can only be combined with other models, not plain numbers: "
+                             "use Const1D(2) or '| Scale(2)' instead of '* 2'.") from None
+        raise
     if inspect.isclass(value) and issubclass(value, Model):
         try:
             value = value()

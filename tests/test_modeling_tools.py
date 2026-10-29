@@ -446,3 +446,8 @@ def test_curve_panel_all_methods(qtbot, ws):
     assert len(p.canvas.figure.axes) == 1
     p.save()
     assert "curve_model" in ws
+
+
+def test_model_times_number_gives_actionable_error():
+    with pytest.raises(ParseError, match="Scale"):
+        mt.parse_model("Gaussian1D(1, 0, 1) * 2")
