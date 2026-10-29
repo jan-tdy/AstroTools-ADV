@@ -1,7 +1,5 @@
 import numpy as np
 import pytest
-from astropy import units as u
-from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.nddata import NDData
 from astropy.table import Table

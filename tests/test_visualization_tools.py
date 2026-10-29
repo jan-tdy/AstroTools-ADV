@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-from astropy import units as u
 from astropy.nddata import NDData
 from astropy.visualization import (AsinhStretch, CompositeStretch, HistEqStretch, LinearStretch,
                                    LogStretch, SqrtStretch)
@@ -153,7 +152,6 @@ def test_viewer_save_png(qtbot, ws, shown, tmp_path):
 
 def test_rgb_panel(qtbot, ws, shown):
     p = panel(qtbot, ws, "viz_rgb")
-    r = synthetic_image((32, 32), seed=1)
     for name, seed in (("r", 1), ("g", 2), ("b", 3)):
         ws.put(name, synthetic_image((32, 32), seed=seed, nan_fraction=0.01))
         p.sel[name].select(name)
@@ -171,7 +169,6 @@ def test_rgb_panel(qtbot, ws, shown):
     p.sel["b"].select("b")
     p.compose()
     assert shown and "shapes differ" in str(shown[0])
-    del r
 
 
 def test_histogram_panel(qtbot, ws, shown):

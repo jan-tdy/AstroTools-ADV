@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
 from astropy import units as u
-from astropy.io import fits
-from astropy.nddata import (CCDData, InverseVariance, NDData, NDDataRef, StdDevUncertainty,
+from astropy.nddata import (CCDData, NDData, NDDataRef, StdDevUncertainty,
                             VarianceUncertainty)
 from astropy.wcs import WCS
 
