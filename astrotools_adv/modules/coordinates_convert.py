@@ -5,7 +5,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import Angle, Distance, Latitude, Longitude, SkyCoord
+from astropy.coordinates import (
+    Angle, Distance, Latitude, Longitude, SkyCoord, get_constellation,
+)
 from astropy.table import Table
 from PyQt5.QtWidgets import QWidget
 
@@ -25,12 +27,29 @@ from .coordinates_common import (
 # Frame converter
 # --------------------------------------------------------------------------- #
 def convert_coords(sc: SkyCoord, frame: Any, rep: str = "spherical", fmt: str = "decimal",
-                   precision: int = 6, alwayssign: bool = False) -> Tuple[SkyCoord, Table]:
-    """Transform ``sc`` to ``frame``; returns ``(SkyCoord, display table)``."""
+                   precision: int = 6, alwayssign: bool = False) -> Tuple[SkyCoord, Table, str]:
+    """Transform ``sc`` to ``frame``; returns ``(SkyCoord, display table, info text)``."""
     with offline_iers():
         out = sc.transform_to(frame)
         table = coord_table(out, rep, fmt, precision, alwayssign)
-    return out, to_plain_table(table)
+        info = [repr(out.frame).splitlines()[0], f"Rows: {out.size}"]
+        if out.data.differentials:
+            info.append("Proper motion / radial velocity are carried through the transform.")
+        flat = out.reshape(-1) if out.isscalar else out
+        shown = flat[:50]
+        try:
+            strings = shown.to_string("hmsdms", precision=min(precision, 6))
+            strings = [strings] if isinstance(strings, str) else list(strings)
+            info.append("\nSkyCoord.to_string('hmsdms'):")
+            info.extend(strings)
+        except Exception:  # noqa: BLE001 - e.g. cartesian-only frames (Galactocentric)
+            pass
+        try:
+            names = np.atleast_1d(get_constellation(shown, short_name=False))
+            info.append("\nConstellation: " + ", ".join(dict.fromkeys(map(str, names))))
+        except Exception:  # noqa: BLE001 - frames that cannot be mapped to ICRS directions
+            pass
+    return out, to_plain_table(table), "\n".join(info)
 
 
 class ConverterPanel(ModulePanel):
@@ -63,13 +82,10 @@ class ConverterPanel(ModulePanel):
                      v["sign"], busy_text="Converting...")
         self.guard(prepare)
 
-    def _done(self, res: Tuple[SkyCoord, Table]) -> None:
-        self.result, self.table = res
+    def _done(self, res: Tuple[SkyCoord, Table, str]) -> None:
+        self.result, self.table, info = res
         self.table_view.set_table(self.table)
-        lines = [repr(self.result.frame).splitlines()[0], f"Rows: {self.result.size}"]
-        if self.result.data.differentials:
-            lines.append("Proper motion / radial velocity are carried through the transform.")
-        self.info.show_text("\n".join(lines))
+        self.info.show_text(info)
         self.set_status(f"Converted {self.result.size} coordinate(s)")
 
     def store(self) -> None:

@@ -239,3 +239,12 @@ def test_angle_panel(qtbot, ws, errors):
 def test_all_specs_open(qtbot, ws):
     for spec in cc.SPECS:
         qtbot.addWidget(spec.factory(ws))
+
+
+def test_converter_info_has_to_string_and_constellation(qtbot, ws):
+    p = make(qtbot, ws, cc.ConverterPanel)
+    p.inp.text.setPlainText("10.684 41.269")
+    p.target.frame.setCurrentText("ICRS")
+    p.convert()
+    text = p.info.toPlainText()
+    assert "00h42m" in text and "Andromeda" in text
