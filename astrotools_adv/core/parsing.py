@@ -191,13 +191,16 @@ def parse_quantity(text: str, default_unit: Optional[Any] = None,
     if not text:
         raise ParseError(f"{name}: empty value.")
     m = _NUM_UNIT.match(text.replace(",", "."))
-    if m and not re.search(r"[(\[*]", text):
+    if m:
         number, unit_txt = float(m.group(1)), m.group(2).strip()
-        if unit_txt:
-            return number * parse_unit(unit_txt, name)
-        if default_unit is None:
-            raise ParseError(f"{name}: {text!r} needs a unit (e.g. '{text} m').")
-        return number * u.Unit(default_unit)
+        if not unit_txt:
+            if default_unit is None:
+                raise ParseError(f"{name}: {text!r} needs a unit (e.g. '{text} m').")
+            return number * u.Unit(default_unit)
+        try:  # 'km/s', 'm**2', 'mag(AB)'; anything else may be an expression
+            return number * u.Unit(unit_txt)
+        except (ValueError, TypeError):
+            pass
     value = safe_eval(text)
     if isinstance(value, u.Quantity):
         return value

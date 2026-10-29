@@ -179,3 +179,11 @@ def test_safe_eval_comparisons_are_elementwise():
     assert list(p.safe_eval("0 < x < 4", {"x": x})) == [True, True, False]
     assert p.safe_eval("1 < 2 < 3") is True
     assert p.safe_eval("3 < 2") is False
+
+
+def test_parse_quantity_composite_units():
+    assert p.parse_quantity("3 m**2") == 3 * u.m ** 2
+    assert p.parse_quantity("0 mag(AB)").unit == u.mag(u.AB)
+    assert p.parse_quantity("2*u.pc") == 2 * u.pc
+    with pytest.raises(p.ParseError):
+        p.parse_quantity("3 notaunit")
