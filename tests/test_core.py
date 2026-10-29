@@ -204,3 +204,14 @@ def test_button_exceptions_are_reported(qtbot, ws, monkeypatch):
     btn = panel.add_button("boom", lambda: 1 / 0)
     btn.click()
     assert isinstance(shown[0], ZeroDivisionError)
+
+
+def test_paramform_values_skip_custom_widgets(qtbot):
+    from PyQt5.QtWidgets import QLabel
+
+    from astrotools_adv.core.widgets import ParamForm
+    form = ParamForm()
+    qtbot.addWidget(form)
+    form.add_text("a", "A", "x")
+    form.add_widget("custom", "C", QLabel("hi"))
+    assert form.values() == {"a": "x"}

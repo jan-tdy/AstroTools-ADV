@@ -292,7 +292,13 @@ class ParamForm(QWidget):
         raise TypeError(f"unsupported form field {type(w).__name__}")
 
     def values(self) -> Dict[str, Any]:
-        return {k: self.value(k) for k in self.fields}
+        """All plain fields; custom widgets added via ``add_widget`` are skipped."""
+        out: Dict[str, Any] = {}
+        for key, w in self.fields.items():
+            if isinstance(w, (QLineEdit, QPlainTextEdit, QComboBox, QCheckBox,
+                              QSpinBox, QDoubleSpinBox)):
+                out[key] = self.value(key)
+        return out
 
     def set_value(self, key: str, value: Any) -> None:
         w = self.fields[key]

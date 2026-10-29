@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import ast
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from astropy import cosmology
