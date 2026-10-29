@@ -274,3 +274,13 @@ def test_call_in_worker_thread(qtbot, ws):
     qtbot.waitUntil(lambda: p._has_result, timeout=20000)
     assert list(p._last_value.mask) == [False] * 5 + [True]
     tasks.wait_all()
+
+
+def test_form_keeps_text_after_construct_and_allows_rerun(panel, ws):
+    """Constructing refreshes the instance list; the arguments must stay for a second run."""
+    panel.select_qualname("astropy.coordinates.SkyCoord")
+    panel.call_form.edits["args"].setText("10*u.deg, 20*u.deg")
+    panel.on_run()
+    assert panel.call_form.edits["args"].text() == "10*u.deg, 20*u.deg"
+    panel.on_run()
+    assert len(ws.names(SkyCoord)) == 2

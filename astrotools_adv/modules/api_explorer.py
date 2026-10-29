@@ -503,6 +503,10 @@ class CallForm(QWidget):
         self._layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
     def set_specs(self, specs: Sequence[ParamSpec]) -> None:
+        # Rebuilding for an identical signature (e.g. after a construct refreshed the
+        # instance list) must not wipe what the user typed.
+        same = [(s.name, s.kind) for s in specs] == [(s.name, s.kind) for s in self.specs]
+        previous = self.raw() if same else {}
         while self._layout.rowCount():
             self._layout.removeRow(0)
         self.edits.clear()
@@ -530,6 +534,7 @@ class CallForm(QWidget):
             if s.wants_text:
                 tip.append("Text parameter: bare words (e.g. a file name) are accepted.")
             edit.setToolTip("\n".join(tip))
+            edit.setText(previous.get(s.name, ""))
             self.edits[s.name] = edit
             self._layout.addRow(label, edit)
 

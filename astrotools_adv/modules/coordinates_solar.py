@@ -284,7 +284,7 @@ class SunMoonPanel(ModulePanel):
         self.events_view = self.add_table("Events")
         self.dark_view = self.add_table("Astronomical night")
         self.sep_view = self.add_table("Moon separation")
-        self.plot = self.add_plot("Sun & Moon altitude")
+        self.plot = self.add_plot("Sun and Moon altitude")
         self.info = self.add_output("Moon phase")
         self.add_button("Compute", self.compute)
         self.add_button("Store tables in workspace", self.store)

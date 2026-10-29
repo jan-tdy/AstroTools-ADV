@@ -442,3 +442,32 @@ def test_builder_notes_missing_wcs_keywords(qtbot, ws, shown):
     p.form.set_value("header", "NAXIS = 2")
     p.build()
     assert not shown and "no WCS keywords" in p.out.toPlainText()
+
+
+def test_strided_slice_rescales_cd_matrix_wcs():
+    import warnings
+
+    from astropy.wcs.utils import proj_plane_pixel_scales
+
+    w = wt.build_wcs("TAN", crval=(150.0, 2.0), crpix=(50.5, 50.5), scale_arcsec=1.0,
+                     rotation_deg=20.0, shape=(100, 80))
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        s = wt.apply_operation(w, "slice", "::2, ::2")
+    assert proj_plane_pixel_scales(s) * 3600 == pytest.approx([2.0, 2.0])
+    assert s.pixel_shape == (50, 40)
+    assert wt.rotation_angle(s) == pytest.approx(20.0)
+
+
+def test_slice_rejects_single_index_and_swapaxes_validates():
+    w = wt.build_wcs("TAN", shape=(100, 80))
+    with pytest.raises(parsing.ParseError, match="Only ranges"):
+        wt.apply_operation(w, "slice", "5")
+    with pytest.raises(parsing.ParseError, match="0-based"):
+        wt.apply_operation(w, "swapaxes", "1 2")
+    assert list(wt.apply_operation(w, "swapaxes", "0 1").wcs.ctype) == ["DEC--TAN", "RA---TAN"]
+
+
+def test_unsupported_frame_message_lists_working_frames():
+    with pytest.raises(parsing.ParseError, match="icrs, fk5, fk4, fk4noeterms, galactic, itrs"):
+        wt.build_wcs_from_frame("geocentricmeanecliptic")

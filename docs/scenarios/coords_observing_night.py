@@ -18,4 +18,4 @@ def run(panel, ws, h):
     night = h.output_text(panel, "Astronomical night")
     assert "2026-10-29 19:52:15,2026-10-30 06:13:47,10.35" in night, night
     assert "Waning Gibbous" in h.output_text(panel, "Moon phase")
-    h.tab(panel, "Sun & Moon altitude")
+    h.tab(panel, "Sun and Moon altitude")
