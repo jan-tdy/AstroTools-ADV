@@ -118,12 +118,27 @@ def build_wcs_from_frame(frame_name: str, proj: str = "TAN", **geometry: Any) ->
                            geometry.get("pv_text", ""), proj)
 
 
+_CARD_RE = re.compile(r"^\s*([A-Za-z0-9_-]{1,8})\s*=\s*(.*)$")
+_CARD_FREE_RE = re.compile(r"^(END|COMMENT|HISTORY|HIERARCH)\b|^$", re.IGNORECASE)
+
+
+def _standard_card(line: str) -> str:
+    """Rewrite ``KEY = value`` (any spacing) as a fixed-format 80-character card."""
+    line = line.rstrip("\r\n")
+    m = _CARD_RE.match(line)
+    if m:
+        return f"{m.group(1).upper():<8}= {m.group(2)}".ljust(80)
+    if _CARD_FREE_RE.match(line.strip()):
+        return line.ljust(80)
+    raise ParseError(f"Header line {line.strip()!r} is not a FITS card (expected 'KEYWORD = value').")
+
+
 def wcs_from_header_text(text: str, relax: bool = True, key: str = " ") -> WCS:
     if not text.strip():
         raise ParseError("Header text is empty.")
-    lines = [ln.rstrip("\r") for ln in text.strip().splitlines()]
+    cards = [_standard_card(ln) for ln in text.strip().splitlines()]
     try:
-        header = fits.Header.fromstring("\n".join(lines), sep="\n")
+        header = fits.Header.fromstring("\n".join(cards), sep="\n")
         return WCS(header, relax=relax, key=key or " ")
     except Exception as exc:  # noqa: BLE001
         raise ParseError(f"Cannot build a WCS from this header: {exc}") from exc
@@ -465,7 +480,11 @@ class WcsBuilderPanel(ModulePanel):
                 raise ParseError("The selected workspace image has no WCS.")
             w = w.deepcopy()
         name = self.ws.put(unique_name(self.ws, v.value("name") or "wcs"), w)
-        self.out.show_text(f"stored as {name!r}\n\n{wcs_summary(w)}")
+        note = ""
+        if not any(w.wcs.ctype):
+            note = ("Note: the source has no WCS keywords (CTYPE is empty), so this is the default "
+                    "linear WCS.\n\n")
+        self.out.show_text(f"stored as {name!r}\n\n{note}{wcs_summary(w)}")
         self.hdr.show_text(header_text(w, v.value("relax")))
 
 

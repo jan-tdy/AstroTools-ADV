@@ -231,6 +231,8 @@ def test_velocity_corrections(qtbot, ws):
     assert np.all(np.abs(np.array(t["rv_corr_bary_kms"]) - np.array(t["rv_corr_helio_kms"])) < 0.02)
     assert np.all(np.abs(np.array(t["ltt_bary_s"])) < 520)
     assert "rv_bary_kms" in t.colnames
+    assert float(t["bjd_tdb_text"][0]) == pytest.approx(t["bjd_tdb"][0], abs=1e-9)
+    assert len(t["bjd_tdb_text"][0].split(".")[1]) == 9
     expected = -300 + corr[0] + (-300) * corr[0] / 299792.458
     assert t["rv_bary_kms"][0] == pytest.approx(expected, abs=1e-6)
     # ecliptic pole is (almost) at rest w.r.t. the orbital motion

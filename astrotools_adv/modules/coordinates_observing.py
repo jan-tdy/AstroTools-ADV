@@ -303,6 +303,9 @@ def velocity_corrections(location: EarthLocation, targets: SkyCoord, times: Time
         out["ltt_helio_s"] = ltt_h.to_value(u.s)
         out["bjd_tdb"] = (tm.tdb + ltt_b).jd
         out["hjd_utc"] = (tm.utc + ltt_h).jd
+        # table views show ~10 significant digits, too few for a Julian date: add exact text
+        out["bjd_tdb_text"] = [f"{x:.9f}" for x in out["bjd_tdb"]]
+        out["hjd_utc_text"] = [f"{x:.9f}" for x in out["hjd_utc"]]
         if observed_rv is not None:
             rv = observed_rv.to_value(u.km / u.s)
             for kind in ("bary", "helio"):

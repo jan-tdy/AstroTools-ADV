@@ -151,7 +151,8 @@ class IersPanel(ModulePanel):
             return (f"Time (UTC): {t.iso}   MJD {t.mjd:.6f}\nSource: {source}\n"
                     f"UT1-UTC = {ut1_utc.to(u.s):.6f}\n"
                     f"polar motion x = {x.to(u.arcsec):.6f}, y = {y.to(u.arcsec):.6f}\n"
-                    f"status code: {np.asarray(status).tolist()} (0 = inside the table)")
+                    f"status code: {np.asarray(status).tolist()} (0 = IERS-B final, 1 = IERS-A observed, "
+                    "2 = IERS-A prediction, -1 / -2 = before / after the table)")
 
         self.run(work, self.info.show_text, busy_text="Looking up ...")
         self.tabs.setCurrentWidget(self.info)

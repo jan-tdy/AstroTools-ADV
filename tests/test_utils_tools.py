@@ -50,7 +50,7 @@ def test_iers_panel_info_lookup_leap(qtbot, ws, iers_conf_restored, errors):
     p.form.set_value("time", "2020-06-01 00:00:00")
     p.lookup()
     out = p.info.toPlainText()
-    assert "UT1-UTC" in out and "inside the table" in out
+    assert "UT1-UTC" in out and "IERS-B final" in out
     # an actual value check against astropy itself
     from astropy.time import Time
     expected = iers.IERS_B.open().ut1_utc(Time("2020-06-01").jd1, Time("2020-06-01").jd2)
