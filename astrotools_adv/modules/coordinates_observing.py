@@ -16,7 +16,7 @@ from ..core.widgets import ModulePanel
 from ..core.workspace import Workspace
 from .coordinates_common import (
     CATEGORY, CoordInput, LocationInput, altitude_function, find_crossings, find_culminations,
-    moon_illumination, offline_iers, parse_times, time_strings,
+    grid_size, moon_illumination, offline_iers, parse_times, time_strings,
 )
 
 MAX_SAMPLES = 5000
@@ -96,7 +96,7 @@ def compute_visibility(location: EarthLocation, targets: SkyCoord, labels: List[
     """Altitude/azimuth/airmass tracks plus rise/transit/set events for each target."""
     if hours <= 0 or step_minutes <= 0:
         raise ParseError("Duration and step must be positive.")
-    n = int(round(hours * 60.0 / step_minutes)) + 1
+    n = grid_size(hours, step_minutes)
     targets = targets.reshape(-1) if targets.isscalar else targets
     if n > MAX_SAMPLES:
         raise ParseError(f"Too many time samples ({n}); increase the step or shorten the "
@@ -115,8 +115,9 @@ def compute_visibility(location: EarthLocation, targets: SkyCoord, labels: List[
         events = []
         for i in range(len(targets)):
             func = altitude_function(location, refraction, targets[i])
-            rising, setting = find_crossings(func, start, hours, step_minutes, horizon_deg)
-            culm = find_culminations(func, start, hours, step_minutes)
+            rising, setting = find_crossings(func, start, hours, step_minutes, horizon_deg,
+                                             values=alt[i].value)
+            culm = find_culminations(func, start, hours, step_minutes, values=alt[i].value)
             best = max(culm, key=lambda c: c[1]) if culm else None
             above = alt[i].value > horizon_deg
             if rising or setting:
@@ -171,7 +172,7 @@ def plot_visibility(alt_canvas: Any, air_canvas: Any, sky_canvas: Any, res: Dict
     if legend:
         ax.legend(fontsize="small", ncol=2)
     alt_canvas.figure.autofmt_xdate()
-    alt_canvas.redraw()
+    alt_canvas.canvas.draw()
 
     ax = air_canvas.axes()
     for i, lab in enumerate(labels):
@@ -183,7 +184,7 @@ def plot_visibility(alt_canvas: Any, air_canvas: Any, sky_canvas: Any, res: Dict
     if legend:
         ax.legend(fontsize="small", ncol=2)
     air_canvas.figure.autofmt_xdate()
-    air_canvas.redraw()
+    air_canvas.canvas.draw()
 
     ax = sky_canvas.axes(projection="polar")
     ax.set_theta_zero_location("N")
@@ -199,7 +200,7 @@ def plot_visibility(alt_canvas: Any, air_canvas: Any, sky_canvas: Any, res: Dict
     ax.set_title("Sky chart (N up, E left; radius = zenith distance)", fontsize="small")
     if legend:
         ax.legend(fontsize="small", loc="upper right", bbox_to_anchor=(1.3, 1.1))
-    sky_canvas.redraw()
+    sky_canvas.canvas.draw()
 
 
 class VisibilityPanel(ModulePanel):

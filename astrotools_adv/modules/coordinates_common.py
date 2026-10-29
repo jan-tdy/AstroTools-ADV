@@ -829,17 +829,25 @@ def parse_times(text: str, name: str = "time") -> Time:
 # --------------------------------------------------------------------------- #
 # Event finding (rise / set / transit / twilight)
 # --------------------------------------------------------------------------- #
+def grid_size(hours: float, step_minutes: float) -> int:
+    """Number of samples used by the event finders for a window and step."""
+    return max(int(np.ceil(hours * 60.0 / step_minutes)) + 1, 2)
+
+
 def find_crossings(func: Callable[[Time], u.Quantity], start: Time, hours: float,
-                   step_minutes: float, level: float = 0.0, iterations: int = 24
-                   ) -> Tuple[List[Time], List[Time]]:
+                   step_minutes: float, level: float = 0.0, iterations: int = 16,
+                   values: Optional[np.ndarray] = None) -> Tuple[List[Time], List[Time]]:
     """Times at which ``func`` (altitude, deg) rises through / falls through ``level``.
 
     Coarse sampling finds sign changes; bisection (vectorised over all brackets)
-    refines them to well below a second.
+    refines them. ``values`` may supply ``func`` (in deg) on the coarse grid to save
+    a evaluation; it must have ``grid_size(hours, step_minutes)`` entries.
     """
-    n = max(int(np.ceil(hours * 60.0 / step_minutes)) + 1, 2)
+    n = grid_size(hours, step_minutes)
     x = np.linspace(0.0, hours / 24.0, n)
-    vals = np.asarray(func(start + x * u.day).to_value(u.deg)) - level
+    if values is None:
+        values = np.asarray(func(start + x * u.day).to_value(u.deg))
+    vals = np.asarray(values) - level
     lo_neg = (vals[:-1] < 0) & (vals[1:] >= 0)
     hi_neg = (vals[:-1] >= 0) & (vals[1:] < 0)
     out: List[List[Time]] = []
@@ -865,11 +873,14 @@ def find_crossings(func: Callable[[Time], u.Quantity], start: Time, hours: float
 
 
 def find_culminations(func: Callable[[Time], u.Quantity], start: Time, hours: float,
-                      step_minutes: float, iterations: int = 40) -> List[Tuple[Time, float]]:
+                      step_minutes: float, iterations: int = 20,
+                      values: Optional[np.ndarray] = None) -> List[Tuple[Time, float]]:
     """Interior local maxima of ``func`` (altitude) as ``(time, value_deg)``."""
-    n = max(int(np.ceil(hours * 60.0 / step_minutes)) + 1, 3)
+    n = max(grid_size(hours, step_minutes), 3)
     x = np.linspace(0.0, hours / 24.0, n)
-    vals = np.asarray(func(start + x * u.day).to_value(u.deg))
+    if values is None or len(values) != n:
+        values = np.asarray(func(start + x * u.day).to_value(u.deg))
+    vals = np.asarray(values)
     idx = np.nonzero((vals[1:-1] >= vals[:-2]) & (vals[1:-1] > vals[2:]))[0] + 1
     if idx.size == 0:
         return []
