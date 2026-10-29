@@ -28,6 +28,7 @@ from PyQt5.QtWidgets import (
     QPushButton, QScrollArea, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
+from ..core.tasks import OUTPUT_LOCK
 from ..core.parsing import ParseError, default_namespace, format_exception, safe_eval
 from ..core.registry import ModuleSpec
 from ..core.widgets import ModulePanel, OutputPane, TableView
@@ -84,7 +85,7 @@ def collect_api() -> Tuple[List[ApiEntry], List[Tuple[str, str]]]:
 
     failures: List[Tuple[str, str]] = []
     names: List[str] = ["astropy"]
-    with warnings.catch_warnings(), contextlib.redirect_stdout(io.StringIO()), \
+    with OUTPUT_LOCK, warnings.catch_warnings(), contextlib.redirect_stdout(io.StringIO()), \
             contextlib.redirect_stderr(io.StringIO()):
         warnings.simplefilter("ignore")
         for info in pkgutil.walk_packages(
@@ -446,8 +447,8 @@ def invoke(call: Callable[[], Any]) -> Outcome:
     out = Outcome()
     buf = io.StringIO()
     before = _pyplot_figures()
-    with warnings.catch_warnings(record=True) as caught, contextlib.redirect_stdout(buf), \
-            contextlib.redirect_stderr(buf):
+    with OUTPUT_LOCK, warnings.catch_warnings(record=True) as caught, \
+            contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
         warnings.simplefilter("always")
         try:
             out.value = call()

@@ -1,0 +1,4 @@
+.md-typeset figure img { border: 1px solid var(--md-default-fg-color--lightest); border-radius: 6px; }
+.md-typeset figcaption { font-size: .8rem; }
+.md-typeset .grid.cards > ul > li, .md-typeset .grid > .card { border-radius: 8px; }
+.md-typeset table:not([class]) td:first-child { white-space: nowrap; }

@@ -945,7 +945,7 @@ class TableEditor(TablePanel):
         sec.form.add_text("cols", "Columns", tip="comma-separated; blank = selected column")
         sec.form.add_text("expr", "Mask where", tip="boolean expression, e.g. a < 0")
         sec.form.add_text("fill", "Fill value")
-        sec.add_button("Mask rows", lambda: self.mask(sec.form))
+        sec.add_button("Mask rows", lambda: self.mask_rows(sec.form))
         sec.add_button("Unmask", lambda: self.unmask(sec.form))
         sec.add_button("Fill masked values", lambda: self.fill(sec.form))
 
@@ -1006,7 +1006,7 @@ class TableEditor(TablePanel):
     def _cols_or_selected(self, f: ParamForm) -> str:
         return f.value("cols") or self._col()
 
-    def mask(self, f: ParamForm) -> None:
+    def mask_rows(self, f: ParamForm) -> None:
         cols, expr = self._cols_or_selected(f), f.value("expr")
         self._go(lambda t: op_mask(t, cols, expr))
 

@@ -202,7 +202,7 @@ def test_create_panel_modes(qtbot, ws, tmp_path):
     f.set_value("n", 10)
     f.set_value("delta", "30 s")
     f.set_value("data", "flux = t * 2\nconst = 5")
-    panel.create()
+    panel.create_series()
     ts = ws.get("series")
     assert isinstance(ts, TimeSeries) and len(ts) == 10
     assert ts["flux"][1] == pytest.approx(2 * 30 / 86400)
@@ -212,7 +212,7 @@ def test_create_panel_modes(qtbot, ws, tmp_path):
     f.set_value("delta", "1 day")
     f.set_value("n", 4)
     f.set_value("data", "x = n")
-    panel.create()
+    panel.create_series()
     assert isinstance(ws.get("binned"), BinnedTimeSeries)
     # from table with numeric JD times
     ws.put("tab", Table({"jd": [2458849.5, 2458850.5, 2458851.5], "v": [1.0, 2.0, 3.0]}))
@@ -221,16 +221,16 @@ def test_create_panel_modes(qtbot, ws, tmp_path):
     f.set_value("time_col", "jd")
     f.set_value("fmt", "jd")
     panel.table_combo.setCurrentText("tab")
-    panel.create()
+    panel.create_series()
     t = ws.get("fromtab")
     assert t.time[0].isot.startswith("2020-01-01") and list(t["v"]) == [1, 2, 3]
     f.set_value("time_col", "missing")
     with pytest.raises(ParseError):
-        panel.create()
+        panel.create_series()
     f.set_value("mode", panel.MODES[3])
     f.set_value("path", str(tmp_path / "nope.ecsv"))
     with pytest.raises(ParseError):
-        panel.create()
+        panel.create_series()
 
 
 def test_edit_panel_roundtrip(qtbot, ws, tmp_path, monkeypatch):
@@ -297,7 +297,7 @@ def test_read_kepler_and_ecsv_files(qtbot, ws, tmp_path):
     f.set_value("path", kfile)
     f.set_value("fileformat", "kepler.fits")
     f.set_value("name", "kepler")
-    panel.create()
+    panel.create_series()
     ts = ws.get("kepler")
     assert ts.colnames == ["time", "sap_flux", "sap_flux_err"] and len(ts) == 10
     # round trip through ECSV
@@ -306,7 +306,7 @@ def test_read_kepler_and_ecsv_files(qtbot, ws, tmp_path):
     f.set_value("path", efile)
     f.set_value("fileformat", "ascii.ecsv")
     f.set_value("name", "from_ecsv")
-    panel.create()
+    panel.create_series()
     assert len(ws.get("from_ecsv")) == 10
     # the other panels see the new series
     lomb = make_panel(qtbot, ws, tt.LombScarglePanel)

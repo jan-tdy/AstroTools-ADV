@@ -96,27 +96,27 @@ def test_viewer_plain_and_wcs(qtbot, ws, shown):
     p = panel(qtbot, ws, "viz_viewer")
     ws.put("star", NDData(synthetic_image((64, 64)), wcs=sky_wcs()))
     p.src.select("star")
-    p.show()
+    p.show_image()
     assert not shown and "WCS axes = True" in p.out.toPlainText()
     for interval in vt.INTERVALS:
         for stretch in vt.STRETCHES:
             p.form.set_value("interval", interval)
             p.form.set_value("stretch", stretch)
             p.form.set_value("a", 10.0)
-            p.show()
+            p.show_image()
     assert not shown
     p.form.set_value("stretch2", "Sqrt")
     p.form.set_value("invert", True)
     p.form.set_value("points", "150.0 2.0\n150.001 2.001")
     p.form.set_value("circles", "150 2 | 10 arcsec")
-    p.show()
+    p.show_image()
     assert not shown and p.out.toPlainText().endswith("True")
     p.form.set_value("mode", "simple_norm")
     p.form.set_value("simple", "asinh")
-    p.show()
+    p.show_image()
     assert not shown and "vmin" in p.out.toPlainText()
     p.form.set_value("circles", "150 2")  # missing '|'
-    p.show()
+    p.show_image()
     assert len(shown) == 1
 
 
@@ -126,25 +126,25 @@ def test_viewer_degenerate_inputs(qtbot, ws, shown):
     ws.put("nan", np.full((5, 5), np.nan))
     ws.put("line", np.arange(10.0))
     p.src.select("one")
-    p.show()
+    p.show_image()
     assert not shown
     p.src.select("nan")
-    p.show()
+    p.show_image()
     assert len(shown) == 1 and "finite" in str(shown[0])
     p.src.select("line")
-    p.show()
+    p.show_image()
     assert len(shown) == 2
     p.src.select("one")
     p.form.set_value("interval", "Manual")
     p.form.set_value("vmin", "x")
-    p.show()
+    p.show_image()
     assert len(shown) == 3
 
 
 def test_viewer_save_png(qtbot, ws, shown, tmp_path):
     p = panel(qtbot, ws, "viz_viewer")
     p.src.make_test_image()
-    p.show()
+    p.show_image()
     out = tmp_path / "v.png"
     p.image.save(str(out))
     assert out.stat().st_size > 1000 and not shown

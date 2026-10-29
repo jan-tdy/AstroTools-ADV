@@ -27,6 +27,7 @@ from ..core.parsing import (
     ParseError, format_exception, parse_float, parse_int, parse_time, safe_eval,
 )
 from ..core.registry import ModuleSpec
+from ..core.tasks import OUTPUT_LOCK
 from ..core.widgets import ModulePanel, OutputPane, ParamForm
 from ..core.workspace import Workspace
 
@@ -40,7 +41,8 @@ def _confirm(parent: QWidget, text: str) -> bool:
 def _capture(fn: Callable[[], Any]) -> Tuple[Any, str, List[str]]:
     """Run ``fn`` returning ``(value, stdout, warnings)``."""
     buf = io.StringIO()
-    with warnings.catch_warnings(record=True) as caught, contextlib.redirect_stdout(buf):
+    with OUTPUT_LOCK, warnings.catch_warnings(record=True) as caught, \
+            contextlib.redirect_stdout(buf):
         warnings.simplefilter("always")
         value = fn()
     return value, buf.getvalue(), [f"{w.category.__name__}: {w.message}" for w in caught]

@@ -5,10 +5,16 @@ callbacks always run on the GUI thread, ``fn`` never does.
 """
 from __future__ import annotations
 
+import threading
 import traceback
 from typing import Any, Callable, List, Optional
 
 from PyQt5.QtCore import QObject, QRunnable, QThreadPool, pyqtSignal
+
+# ``contextlib.redirect_stdout`` swaps a process-wide global. Overlapping redirects from
+# two threads can restore the wrong stream and leave sys.stdout replaced for good, so all
+# redirecting code takes this lock first.
+OUTPUT_LOCK = threading.RLock()
 
 _synchronous = False
 _alive: List["_Task"] = []  # keeps running tasks (and their signals) referenced
@@ -34,13 +40,16 @@ class _Task(QRunnable):
 
     def run(self) -> None:  # executed in a pool thread
         try:
-            value = self.fn(*self.args, **self.kwargs)
-        except BaseException as exc:  # noqa: BLE001 - report everything to the GUI
-            self.signals.error.emit(exc, traceback.format_exc())
-        else:
-            self.signals.result.emit(value)
-        finally:
-            self.signals.finished.emit()
+            try:
+                value = self.fn(*self.args, **self.kwargs)
+            except BaseException as exc:  # noqa: BLE001 - report everything to the GUI
+                self.signals.error.emit(exc, traceback.format_exc())
+            else:
+                self.signals.result.emit(value)
+            finally:
+                self.signals.finished.emit()
+        except RuntimeError:
+            pass  # Qt objects were destroyed (application is shutting down)
 
 
 def submit(

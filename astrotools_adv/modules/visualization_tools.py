@@ -231,10 +231,10 @@ class ViewerPanel(ModulePanel, ScaleMixin):
         self.image = self.add_plot("Image")
         self.curve = self.add_plot("Stretch")
         self.out = self.add_output("Info")
-        self.add_button("Show image", self.show)
+        self.add_button("Show image", self.show_image)
         self.add_button("Save PNG...", self.save)
 
-    def show(self) -> None:
+    def show_image(self) -> None:
         self.guard(self._show)
 
     def _show(self) -> None:

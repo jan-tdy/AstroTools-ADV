@@ -297,7 +297,7 @@ def test_builder_panel_flow(qtbot, ws):
     assert np.allclose(y, p.model(x))
     p.form.set_value("expr", "Gaussian2D(1, 0, 0, 1, 1)")
     p.evaluate()
-    p.render()
+    p.render_model()
     assert p.render_canvas.figure.axes
     p.form.set_value("expr", "Shift(2) | Scale(3)")
     p.save_inverse()

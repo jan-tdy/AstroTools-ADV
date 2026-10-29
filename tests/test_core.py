@@ -215,3 +215,45 @@ def test_paramform_values_skip_custom_widgets(qtbot):
     form.add_text("a", "A", "x")
     form.add_widget("custom", "C", QLabel("hi"))
     assert form.values() == {"a": "x"}
+
+
+def test_panels_do_not_shadow_qwidget_methods(qtbot):
+    """A panel method named show/create/render/mask silently replaces the Qt one."""
+    import importlib
+    import inspect
+    import pkgutil
+
+    from PyQt5.QtWidgets import QWidget
+
+    from astrotools_adv import modules
+
+    allowed_events = {"closeEvent", "showEvent", "resizeEvent", "keyPressEvent",
+                      "dragEnterEvent", "dropEvent", "paintEvent", "changeEvent",
+                      "sizeHint", "minimumSizeHint", "hideEvent"}
+    qt_names = set(dir(QWidget))
+    clashes = []
+    for info in pkgutil.iter_modules(modules.__path__):
+        mod = importlib.import_module(f"{modules.__name__}.{info.name}")
+        for name, cls in inspect.getmembers(mod, inspect.isclass):
+            if cls.__module__ == mod.__name__ and issubclass(cls, QWidget):
+                clashes += [f"{info.name}.{name}.{attr}" for attr in vars(cls)
+                            if attr in qt_names and not attr.startswith("__")
+                            and attr not in allowed_events]
+    assert clashes == []
+
+
+def test_building_every_panel_leaves_stdout_intact(qtbot):
+    """Panels redirect stdout internally (API explorer, utils); it must be restored."""
+    import sys
+
+    from astrotools_adv.core import tasks as _tasks
+    from astrotools_adv.core.workspace import Workspace
+
+    _tasks.set_synchronous(False)
+    out, err = sys.stdout, sys.stderr
+    specs, _ = registry.discover()
+    w = Workspace()
+    for spec in specs:
+        spec.factory(w).deleteLater()
+    _tasks.wait_all(60000)
+    assert sys.stdout is out and sys.stderr is err

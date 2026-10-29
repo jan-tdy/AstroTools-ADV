@@ -461,7 +461,7 @@ class CreatePanel(ModulePanel):
                      "ascii.basic", "fits"], editable=True,
                     tip="'kepler.fits'/'tess.fits' need no time column.")
         self.add_button("Browse file...", self.browse)
-        self.add_button("Create series", lambda: self.guard(self.create))
+        self.add_button("Create series", lambda: self.guard(self.create_series))
         self.info = self.add_output("Info")
         self.view = self.add_table("Table")
 
@@ -470,7 +470,7 @@ class CreatePanel(ModulePanel):
         if path:
             self.form.set_value("path", path)
 
-    def create(self) -> None:
+    def create_series(self) -> None:
         v = self.form.values()
         mode = self.MODES.index(v["mode"])
         name = v["name"]
@@ -567,7 +567,7 @@ class EditPanel(SeriesPanel):
         f.add_text("t_from", "Keep from", "", "ISO time; blank = open.")
         f.add_text("t_to", "Keep until", "", "ISO time; blank = open.")
         f.add_text("out", "Result name", "", "Blank = replace the selected series.")
-        self.add_button("Show", lambda: self.guard(self.show))
+        self.add_button("Show", lambda: self.guard(self.show_series))
         self.add_button("Add column", lambda: self.guard(self.add_column))
         self.add_button("Remove columns", lambda: self.guard(self.drop))
         self.add_button("Slice by time", lambda: self.guard(self.slice_time))
@@ -585,7 +585,7 @@ class EditPanel(SeriesPanel):
         self.view.set_table(ts)
         self.set_status(f"Stored '{name}' ({len(ts)} rows)")
 
-    def show(self) -> None:
+    def show_series(self) -> None:
         ts = self.current_series()
         self.info.show_text(_info(ts))
         self.view.set_table(ts)

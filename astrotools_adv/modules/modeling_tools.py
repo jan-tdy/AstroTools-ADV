@@ -476,7 +476,7 @@ class ModelBuilderPanel(ModulePanel):
         f.add_text("save", "Workspace name", "model")
         self.add_button("Build / describe", self.build)
         self.add_button("Evaluate & plot", self.evaluate)
-        self.add_button("Render (bounding box)", self.render)
+        self.add_button("Render (bounding box)", self.render_model)
         self.add_button("Save model to workspace", self.save_model)
         self.add_button("Save inverse to workspace", self.save_inverse)
         self.add_button("Apply parameter edits", self.apply_edits)
@@ -663,7 +663,7 @@ class ModelBuilderPanel(ModulePanel):
         self.canvas.redraw()
         self.tabs.setCurrentWidget(self.canvas)
 
-    def render(self) -> None:
+    def render_model(self) -> None:
         def go() -> None:
             m = self.current()
             n = self.form.value("n")
