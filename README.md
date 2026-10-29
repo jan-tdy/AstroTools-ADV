@@ -4,6 +4,8 @@ A PyQt5 desktop application that exposes the **astropy** ecosystem (and **astroq
 through a GUI. Everything runs locally; online archives are only contacted when you
 press a query button.
 
+If you found this useful, please give this repo a star.
+
 ## Documentation
 
 Full documentation, with a page for every tool and worked guides: <https://jan-tdy.github.io/AstroTools-ADV/>. It is built from `docs/` with MkDocs; see `docs/project/building-the-docs.md` to build it locally.
