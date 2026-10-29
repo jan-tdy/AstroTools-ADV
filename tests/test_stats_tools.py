@@ -360,6 +360,22 @@ def test_histogram_methods():
         st.compute_histogram(d, "number", 0, None, None)
 
 
+def test_bayesian_blocks_events_use_counts():
+    t = np.arange(100.0)
+    counts = np.r_[np.full(40, 1.0), np.full(30, 6.0), np.full(30, 1.0)]
+    r = st.compute_blocks(t, counts, None, "events", 0.05, None, None)
+    assert list(r["edges"]) == pytest.approx([0.0, 39.5, 69.5, 99.0])
+    with pytest.raises(ParseError):  # non-integer counts are rejected with a readable message
+        st.compute_blocks(t, counts * 0.5, None, "events", 0.05, None, None)
+
+
+def test_circular_mean_wraps_noise_to_zero():
+    r = st.compute_circular(np.array([350.0, 355.0, 5.0, 10.0]), u.deg, None, 0.0, 1.0, None)
+    assert r["circmean"] == 0.0
+    h = st.compute_circular(np.array([23.0, 23.5, 0.5, 1.0]), u.hourangle, None, 0.0, 1.0, None)
+    assert h["circmean"] == 0.0
+
+
 def test_bayesian_blocks_finds_step():
     rng = np.random.default_rng(11)
     t = np.sort(np.r_[rng.uniform(0, 5, 100), rng.uniform(5, 10, 600)])
