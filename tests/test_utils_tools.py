@@ -1,9 +1,7 @@
-import os
 import zipfile
 
 import pytest
 from astropy import config
-from astropy.table import Table
 from astropy.utils import data, iers
 
 from astrotools_adv.core.parsing import ParseError

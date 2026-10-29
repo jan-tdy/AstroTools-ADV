@@ -1,8 +1,7 @@
 """Observer location, target visibility (alt/az, rise/set/transit) and velocity corrections."""
 from __future__ import annotations
 
-import datetime as dt
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from astropy import units as u
@@ -31,7 +30,7 @@ MAX_TARGETS = 200
 def location_table(loc: EarthLocation, ellipsoid: str = "WGS84") -> Table:
     """Key/value table describing an EarthLocation."""
     geo = loc.to_geodetic(ellipsoid)
-    xyz = loc.to(u.m)
+    x, y, z = (c.to_value(u.m) for c in (loc.x, loc.y, loc.z))
     rows = [
         ("ellipsoid", ellipsoid),
         ("longitude [deg]", f"{geo.lon.wrap_at(180 * u.deg).deg:.8f}"),
@@ -39,10 +38,10 @@ def location_table(loc: EarthLocation, ellipsoid: str = "WGS84") -> Table:
         ("longitude (dms)", geo.lon.wrap_at(180 * u.deg).to_string(u.deg, sep=":", precision=3)),
         ("latitude (dms)", geo.lat.to_string(u.deg, sep=":", precision=3, alwayssign=True)),
         ("height [m]", f"{geo.height.to_value(u.m):.3f}"),
-        ("geocentric x [m]", f"{xyz.x.value:.3f}"),
-        ("geocentric y [m]", f"{xyz.y.value:.3f}"),
-        ("geocentric z [m]", f"{xyz.z.value:.3f}"),
-        ("distance from Earth centre [km]", f"{np.linalg.norm(xyz.value) / 1000.0:.4f}"),
+        ("geocentric x [m]", f"{x:.3f}"),
+        ("geocentric y [m]", f"{y:.3f}"),
+        ("geocentric z [m]", f"{z:.3f}"),
+        ("distance from Earth centre [km]", f"{np.sqrt(x * x + y * y + z * z) / 1000.0:.4f}"),
     ]
     t = Table(rows=rows, names=("property", "value"))
     return t
@@ -287,9 +286,8 @@ def velocity_corrections(location: EarthLocation, targets: SkyCoord, times: Time
         raise ParseError(f"{n_t} targets vs {n_s} times: use equal counts or a single one.")
     n = max(n_t, n_s)
     with offline_iers():
-        tg = targets if n_t == n else SkyCoord(np.repeat(targets.data, n), frame=targets.frame)
-        tm = times if n_s == n else Time(np.repeat(times.jd1, n), np.repeat(times.jd2, n),
-                                         format="jd", scale=times.scale)
+        tg = targets if n_t == n else targets[np.zeros(n, dtype=int)]
+        tm = times if n_s == n else times[np.zeros(n, dtype=int)]
         out = Table()
         out["time_utc"] = time_strings(tm.utc, precision=3)
         out["jd_utc"] = tm.utc.jd

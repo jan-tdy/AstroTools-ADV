@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import (
 )
 
 from ..core.parsing import (
-    ParseError, default_namespace, parse_float, parse_int, parse_unit, safe_eval,
+    ParseError, default_namespace, parse_float, parse_unit, safe_eval,
 )
 from ..core.registry import ModuleSpec
 from ..core.widgets import ModulePanel, ParamForm, WorkspaceCombo

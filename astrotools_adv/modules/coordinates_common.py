@@ -51,11 +51,13 @@ def offline_iers() -> Iterator[None]:
     Restores the previous configuration on exit, also after an exception.
     """
     import erfa
+    from astropy.utils.exceptions import AstropyWarning
 
     with iers.conf.set_temp("auto_download", False), \
             iers.conf.set_temp("iers_degraded_accuracy", "ignore"), \
             warnings.catch_warnings():
         warnings.simplefilter("ignore", erfa.ErfaWarning)
+        warnings.simplefilter("ignore", AstropyWarning)  # e.g. "IERS data not valid for date"
         yield
 
 

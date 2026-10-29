@@ -3,7 +3,6 @@ import threading
 import time
 
 import pytest
-from astropy import units as u
 from astropy.io import fits
 from astropy.table import Table
 

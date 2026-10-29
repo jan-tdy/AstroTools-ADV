@@ -27,7 +27,7 @@ from ..core.parsing import (
     ParseError, format_exception, parse_float, parse_int, parse_time, safe_eval,
 )
 from ..core.registry import ModuleSpec
-from ..core.widgets import ModulePanel, OutputPane, ParamForm, TableView
+from ..core.widgets import ModulePanel, OutputPane, ParamForm
 from ..core.workspace import Workspace
 
 IERS_CONFIG_ITEMS = ("auto_download", "auto_max_age", "iers_degraded_accuracy", "remote_timeout")
