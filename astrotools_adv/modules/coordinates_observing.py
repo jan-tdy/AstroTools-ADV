@@ -188,7 +188,7 @@ def plot_visibility(alt_canvas: Any, air_canvas: Any, sky_canvas: Any, res: Dict
 
     ax = sky_canvas.axes(projection="polar")
     ax.set_theta_zero_location("N")
-    ax.set_theta_direction(-1)
+    ax.set_theta_direction(1)  # looking up at the sky: east is to the left of north
     for i, lab in enumerate(labels):
         up = res["alt"][i] > 0
         theta = np.deg2rad(np.where(up, res["az"][i], np.nan))
@@ -199,7 +199,8 @@ def plot_visibility(alt_canvas: Any, air_canvas: Any, sky_canvas: Any, res: Dict
     ax.set_yticklabels(["60°", "30°", "0°"])
     ax.set_title("Sky chart (N up, E left; radius = zenith distance)", fontsize="small")
     if legend:
-        ax.legend(fontsize="small", loc="upper right", bbox_to_anchor=(1.3, 1.1))
+        ax.legend(fontsize="small", loc="upper left", bbox_to_anchor=(1.05, 1.0))
+        sky_canvas.figure.subplots_adjust(right=0.72)
     sky_canvas.canvas.draw()
 
 
