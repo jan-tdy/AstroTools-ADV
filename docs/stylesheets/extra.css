@@ -2,3 +2,4 @@
 .md-typeset figcaption { font-size: .8rem; }
 .md-typeset .grid.cards > ul > li, .md-typeset .grid > .card { border-radius: 8px; }
 .md-typeset table:not([class]) td:first-child { white-space: nowrap; }
+.md-typeset .lede { font-size: 1.12em; color: var(--md-default-fg-color--light); margin-bottom: 1.6em; }

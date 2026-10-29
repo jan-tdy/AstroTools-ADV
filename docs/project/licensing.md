@@ -15,6 +15,8 @@ AstroTools-ADV's own source code is released under the **MIT License**. It is di
 | Matplotlib | Matplotlib licence (BSD-compatible) |
 | PyQt5 | **GPL-3.0-only, or a commercial licence from Riverbank Computing** |
 
+The documentation is built with MkDocs (BSD-3-Clause), Material for MkDocs (MIT) and pymdown-extensions (MIT) at build time only; none of them is part of the program.
+
 ## PyQt5
 
 Importing PyQt5 at run time from MIT-licensed source, with PyQt5 installed by the user or the distribution, is the situation this project is built for. It leaves the MIT source as it is.

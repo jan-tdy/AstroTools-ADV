@@ -10,7 +10,7 @@ python3 -m pip install -r requirements-dev.txt
 QT_QPA_PLATFORM=offscreen python3 -m pytest
 ```
 
-The suite runs Qt offscreen, uses matplotlib's `Agg` backend and switches background tasks to run inline, so it needs no display and finishes in about a minute.
+`.github/workflows/ci.yml` runs the same command on every pull request. The suite runs Qt offscreen, uses matplotlib's `Agg` backend and switches background tasks to run inline, so it needs no display and finishes in about a minute.
 
 ## Conventions
 
