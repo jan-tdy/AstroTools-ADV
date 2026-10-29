@@ -302,13 +302,31 @@ def highlevel_transform(w: WCS, text: str, direction: str) -> Table:
         raise ParseError(f"High-level transformation failed: {exc}") from exc
 
 
+def _cd_to_pc_cdelt(w: WCS) -> WCS:
+    """Same transformation with the CD matrix stored as PC (CDELT = 1)."""
+    new = w.deepcopy()
+    cd = np.array(new.wcs.cd, dtype=float)
+    del new.wcs.cd
+    new.wcs.cdelt = np.ones(new.naxis)
+    new.wcs.pc = cd
+    new.wcs.set()
+    return new
+
+
 def apply_operation(w: WCS, op: str, arg: str) -> WCS:
     """Slice / sub / swapaxes / reorient / dropaxis / rename on a copy of ``w``."""
     try:
         if op == "slice":
             if not arg.strip():
                 raise ParseError("Slice is empty (e.g. '10:50, 20:60').")
-            return w.slice(safe_eval(f"s_[{arg}]", {"s_": np.s_}))
+            view = safe_eval(f"s_[{arg}]", {"s_": np.s_})
+            parts = view if isinstance(view, tuple) else (view,)
+            if not all(isinstance(part, slice) for part in parts):
+                raise ParseError("Only ranges such as '10:50, 20:60' are supported; a single index "
+                                 "would remove an axis (use dropaxis for that).")
+            if w.wcs.has_cd() and any(part.step not in (None, 1) for part in parts):
+                w = _cd_to_pc_cdelt(w)  # WCS.slice rescales CDELT only, never a CD matrix
+            return w.slice(view)
         if op == "sub":
             keys = {"celestial": WCSSUB_CELESTIAL, "spectral": WCSSUB_SPECTRAL,
                     "longitude": WCSSUB_LONGITUDE, "latitude": WCSSUB_LATITUDE}
@@ -318,8 +336,11 @@ def apply_operation(w: WCS, op: str, arg: str) -> WCS:
             axes = [keys[t.lower()] if t.lower() in keys else parse_int(t, "axis") for t in toks]
             return w.sub(axes)
         if op == "swapaxes":
-            a, b = (parse_int(t, "axis") for t in re.split(r"[\s,;]+", arg.strip()) if t)
-            return w.swapaxes(a, b)
+            idx = [parse_int(t, "axis") for t in re.split(r"[\s,;]+", arg.strip()) if t]
+            if len(idx) != 2 or not all(0 <= i < w.naxis for i in idx):
+                raise ParseError(f"swapaxes needs two 0-based axis numbers between 0 and {w.naxis - 1}, "
+                                 "e.g. '0 1'.")
+            return w.swapaxes(*idx)
         if op == "reorient_celestial_first":
             return w.reorient_celestial_first()
         if op == "dropaxis":
